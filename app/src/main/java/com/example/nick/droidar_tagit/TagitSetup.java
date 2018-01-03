@@ -1,9 +1,23 @@
 package com.example.nick.droidar_tagit;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import actions.Action;
 import actions.ActionBufferedCameraAR;
@@ -31,6 +45,16 @@ import worldData.Obj;
 import worldData.SystemUpdater;
 import worldData.World;
 
+import android.app.Activity;
+import android.app.ListActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
+
 public class TagitSetup extends Setup {
 
 	private GLCamera camera;
@@ -38,11 +62,27 @@ public class TagitSetup extends Setup {
 	private Wrapper placeObjectWrapper;
 	private static int RESULT_LOAD_IMAGE = 1;
 
-	String textToDisplay = "default";
+	String textToDisplay = "enter text here";
 
 	private GLText searchText;
 
 	private GeoObj thisPosition;
+
+	public ImageButton previewImage;
+
+	public Obj placerContainer;
+
+	private boolean placeMode = false;
+
+	MeshComponent arrow;
+	Bitmap myBitmap;
+
+
+
+	public void updatePreviewImage(){
+
+
+	}
 
 	@Override
 	public void _a_initFieldsIfNecessary() {
@@ -72,9 +112,6 @@ public class TagitSetup extends Setup {
 		placeObjectWrapper.setTo(placerContainer);
 		renderer.addRenderElement(world);
 
-		Toast toast;
-		toast = Toast.makeText(getActivity().getBaseContext(), String.valueOf(currentPosition.getLatitude()), Toast.LENGTH_LONG);
-		toast.show();
 	}
 
 	@Override
@@ -102,60 +139,22 @@ public class TagitSetup extends Setup {
 	}
 
 	@Override
-	public void _e2_addElementsToGuiSetup(GuiSetup guiSetup, Activity context) {
+	public void _e2_addElementsToGuiSetup(final GuiSetup guiSetup, Activity context) {
 
-		guiSetup.addButtonToTopView(new Command() {
-			@Override
-			public boolean execute() {
-				final Obj placerContainer = newObject();
-				world.add(placerContainer);
-				placeObjectWrapper.setTo(placerContainer);
-				return true;
-			}
-
-			private Obj newObject() {
-				final Obj placerContainer = new Obj();
-
-				String uriString;
-				uriString = null;
-
-				MeshComponent arrow;
-
-				IO.Settings s = new IO.Settings(getActivity(), "testSettings");
-				String stringKey = "skey";
-				uriString = s.loadString(stringKey);
-
-				if( uriString == null) {
-
-					arrow = TagitFactory.getInstance()
-							.newTexturedSquare(
-									"iconId",
-									IO.loadBitmapFromId(myTargetActivity,
-											R.drawable.t_icon));
-
-				}
-				else{
-
-					arrow = TagitFactory.getInstance()
-							.newTexturedSquare(
-									"customId",
-									IO.loadBitmapFromFile(uriString));
-
-					arrow.addAnimation(new AnimationFaceToCamera(camera));
-
-				}
-
-				arrow.setOnClickCommand(new Command() {
-					@Override
-					public boolean execute() {
-						placeObjectWrapper.setTo(placerContainer);
-						return true;
-					}
-				});
-				placerContainer.setComp(arrow);
-				return placerContainer;
-			}
-		}, "Add Tag");
+		//guiSetup.addButtonToTopView(new Command() {
+//
+		//	@Override
+		//	public boolean execute() {
+		//		final Obj placerContainer = new Obj();
+		//		placerContainer.setComp(null);
+		//		world.add(placerContainer);
+		//		placeObjectWrapper.setTo(placerContainer);
+		//		guiSetup.getTopView().getChildAt(0).setVisibility(View.GONE);
+//
+		//		return true;
+		//	}
+//
+		//}, "Add Tag");
 
 		guiSetup.addButtonToTopView(new Command() {
 
@@ -166,68 +165,307 @@ public class TagitSetup extends Setup {
 				mediaChooser.setType("video/*, image/*");
 				((Activity) myTargetActivity).startActivityForResult(mediaChooser,RESULT_LOAD_IMAGE );
 
+				//IO.Settings s = new IO.Settings(getActivity(), "testSettings");
+				//String stringKey = "skey";
+				//String uriString = "";
+				//uriString = s.loadString(stringKey);
+
+				//Bitmap myBitmap = BitmapFactory.decodeFile(uriString);
+
+				//previewImage.setImageBitmap(myBitmap);
+
+				//Toast toast;
+				//toast = Toast.makeText(getActivity().getBaseContext(), uriString, Toast.LENGTH_LONG);
+				//toast.show();
+
+				//previewImage.setImageResource(myBitmap);
+
 				return true;
 			}
 
-		}, "Pick Tag");
+		}, "");
+
+		View pickImageButton = guiSetup.getTopView().getChildAt(0);
+		if (pickImageButton instanceof Button) {
+
+			((Button) pickImageButton).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_photo_black_24px, 0,0,0);
+
+		}
 
 		guiSetup.addButtonToTopView(new Command() {
 
+			@Override
 			public boolean execute() {
-				final Obj placerContainer = newTextObject();
-				world.add(placerContainer);
-				placeObjectWrapper.setTo(placerContainer);
+
+				View ibView = guiSetup.getBottomView().getChildAt(0);
+				if (ibView instanceof EditText) {
+
+					((EditText) ibView).setVisibility(View.VISIBLE);
+
+					((EditText) ibView).requestFocusFromTouch();
+					InputMethodManager lManager = (InputMethodManager)getActivity().getSystemService(getActivity().getBaseContext().INPUT_METHOD_SERVICE);
+					lManager.showSoftInput(((EditText) ibView), 0);
+
+				}
+
 				return true;
+			}
+
+		}, "");
+
+		View pickTextButton = guiSetup.getTopView().getChildAt(1);
+		if (pickTextButton instanceof Button) {
+
+			((Button) pickTextButton).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_comment_black_24px, 0,0,0);
+
+		}
+
+		guiSetup.addSearchbarToView(guiSetup.getBottomView(), new Command() {
+
+			public boolean execute() {
+
+				newTextObject();
+				return false;
 			}
 
 			private Obj newTextObject() {
 				final Obj placerContainer = new Obj();
 
-				Vec textVec = new Vec(0,0,20);
-				MeshComponent textComp;
+				Vec textVec = new Vec(0,0,10);
+
 				int textSize = 2;
 
 				TextView v = new TextView(getActivity().getBaseContext());
+
+				View ibView = guiSetup.getBottomView().getChildAt(0);
+				if (ibView instanceof EditText) {
+
+					if(((EditText) ibView).getText().toString().matches("")) {
+
+						textToDisplay = "Tagit";
+					}
+					else {
+						textToDisplay = ((EditText) ibView).getText().toString();
+					}
+				}
+
+				//((EditText) ibView).setTextColor(Color.GREEN);
+
 				v.setText(textToDisplay);
+				v.setBackgroundColor(Color.DKGRAY);
 
-				textComp = TagitFactory.getInstance().newTexturedSquare("textBitmap"
+				myBitmap = IO.loadBitmapFromView(v);
+
+				previewImage.setImageBitmap(myBitmap);
+
+				arrow = TagitFactory.getInstance().newTexturedSquare("textBitmap"
 						+ textToDisplay, IO.loadBitmapFromView(v), textSize);
-				textComp.setPosition(textVec);
-				textComp.addAnimation(new AnimationFaceToCamera(camera));
+				arrow.setPosition(textVec);
+				arrow.addAnimation(new AnimationFaceToCamera(camera));
 
-				textComp.setOnClickCommand(new Command() {
+				arrow.setOnClickCommand(new Command() {
 					@Override
 					public boolean execute() {
 						placeObjectWrapper.setTo(placerContainer);
 						return true;
 					}
 				});
-				placerContainer.setComp(textComp);
+				placerContainer.setComp(arrow);
+
+				world.add(placerContainer);
+				placeObjectWrapper.setTo(placerContainer);
+				guiSetup.getBottomView().getChildAt(1).setVisibility(View.VISIBLE);
+				guiSetup.getBottomView().getChildAt(2).setVisibility(View.VISIBLE);
+				//guiSetup.getBottomView().getChildAt(0).setVisibility(View.GONE);
+
 				return placerContainer;
-			}
-
-		}, "Pick Text");
-
-		guiSetup.addSearchbarToView(guiSetup.getBottomView(), new Command() {
-
-			@Override
-			public boolean execute() {
-				return false;
-			}
-
-			@Override
-			public boolean execute(Object transfairObject) {
-				if (transfairObject instanceof String) {
-					textToDisplay = (String) transfairObject;
-					//if (searchText != null)
-					//	searchText.changeTextTo(textToDisplay);
-
-				}
-				return true;
 			}
 		}, textToDisplay);
 
+		View myEditText = guiSetup.getBottomView().getChildAt(0);
+		if (myEditText instanceof EditText) {
+
+
+			((EditText) myEditText).setWidth (0);
+			((EditText) myEditText).setHeight (0);
+			((EditText) myEditText).getBackground().setAlpha(0);
+			((EditText) myEditText).setClickable(false);
+
+		}
+
+		guiSetup.addImangeButtonToRightView(R.drawable.t_icon, new Command() {
+
+			@Override
+			public boolean execute() {
+				//Toast toast;
+				//toast = Toast.makeText(getActivity().getBaseContext(), "image button pressed", Toast.LENGTH_LONG);
+				//toast.show();
+
+
+				View ibView = guiSetup.getRightView().getChildAt(0);
+				if (ibView instanceof ImageButton) {
+
+					//Bitmap bitmap = ((BitmapDrawable)(((ImageButton) ibView)).getD
+					Bitmap bitmap = ((BitmapDrawable)(((ImageButton) ibView)).getDrawable()).getBitmap();
+					placeObjectFromSelector(bitmap);
+					//placeMode = true;
+					guiSetup.getBottomView().getChildAt(1).setVisibility(View.VISIBLE);
+					guiSetup.getBottomView().getChildAt(2).setVisibility(View.VISIBLE);
+				}
+
+				return false;
+				}
+
+			}
+		);
+
+		guiSetup.addImangeButtonToBottomView(R.drawable.ic_check_circle_black_24px, new Command() {
+
+			@Override
+			public boolean execute() {
+
+				final Obj placerContainer = new Obj();
+				placerContainer.setComp(null);
+				world.add(placerContainer);
+				placeObjectWrapper.setTo(placerContainer);
+				guiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
+				guiSetup.getBottomView().getChildAt(2).setVisibility(View.GONE);
+
+				return true;
+			}
+
+		});
+
+		guiSetup.addImangeButtonToBottomView(R.drawable.ic_cancel_black_24px, new Command() {
+
+			@Override
+			public boolean execute() {
+
+				//final Obj placerContainer = new Obj();
+				//placerContainer.setComp(null);
+				//world.add(placerContainer);
+				//placeObjectWrapper.setTo(placerContainer);
+
+				placerContainer.remove(arrow);
+				//placeObjectWrapper.clear();
+
+				guiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
+				guiSetup.getBottomView().getChildAt(2).setVisibility(View.GONE);
+
+				return true;
+			}
+
+		});
+
 		guiSetup.setTopViewCentered();
+		guiSetup.setBottomViewCentered();
+
+
+		int buttHeight = 500;
+		int buttWidth = 150;
+
+		View ibView = guiSetup.getRightView().getChildAt(0);
+		if (ibView instanceof ImageButton) {
+
+			previewImage = ((ImageButton) ibView);
+			//ImageButton imageB = (ImageButton) ibView;
+
+			previewImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+			// do what you want with imageView
+		}
+
+		guiSetup.getRightView().getLayoutParams().height = buttHeight;
+		guiSetup.getRightView().getLayoutParams().width = buttWidth;
+		guiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
+		guiSetup.getBottomView().getChildAt(2).setVisibility(View.GONE);
+
+
+		final String[] itemname ={
+				"Safari",
+				"Camera",
+				"Global",
+				"Safari",
+				"Camera",
+				"Global",
+				"Safari",
+				"Camera",
+				"Global",
+
+		};
+
+		Integer[] imgid={
+				R.drawable.ic_cancel_black_24px,
+				R.drawable.ic_font_download_white_24px,
+				R.drawable.ic_insert_photo_black_24px,
+				R.drawable.ic_cancel_black_24px,
+				R.drawable.ic_font_download_white_24px,
+				R.drawable.ic_insert_photo_black_24px,
+				R.drawable.ic_cancel_black_24px,
+				R.drawable.ic_font_download_white_24px,
+				R.drawable.ic_insert_photo_black_24px,
+
+		};
+
+
+		ListView DynamicListView = new ListView(getActivity().getBaseContext());
+
+		guiSetup.getLeftOuter().removeAllViews();
+
+		DynamicListView.setDivider(null);
+		DynamicListView.setDividerHeight(0);
+
+		DynamicListView.setVerticalScrollbarPosition(View.SCROLLBAR_POSITION_LEFT);
+
+		//guiSetup.getLeftView().addView(DynamicListView);
+		guiSetup.getLeftOuter().addView(DynamicListView);
+
+		ViewGroup.LayoutParams params = guiSetup.getLeftOuter().getLayoutParams();
+		//TODO change width to something dynamic and scalable
+		params.width = 160;
+		guiSetup.getLeftOuter().setLayoutParams(params);
+		guiSetup.getLeftOuter().requestLayout();
+
+		CustomListAdapter adapter=new CustomListAdapter(getActivity(), itemname, imgid);
+		//list=(ListView)findViewById(R.id.list);
+		DynamicListView.setAdapter(adapter);
+
+		DynamicListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+									int position, long id) {
+				// TODO Auto-generated method stub
+				String Selecteditem= itemname[+position];
+				Toast.makeText(getActivity().getApplicationContext(), Selecteditem, Toast.LENGTH_SHORT).show();
+
+
+			}
+		});
+
+
+	}
+
+	public void placeObjectFromSelector(Bitmap selectedBitmap) {
+
+		placerContainer = newPlacedObject(selectedBitmap);
+		world.add(placerContainer);
+		placeObjectWrapper.setTo(placerContainer);
+
+	}
+
+	public Obj newPlacedObject(Bitmap selectedBitmap) {
+
+		placerContainer = new Obj();
+		arrow = TagitFactory.getInstance()
+					.newTexturedSquare(
+							selectedBitmap.toString(),
+							selectedBitmap,5);
+
+		arrow.addAnimation(new AnimationFaceToCamera(camera));
+
+		placerContainer.setComp(arrow);
+		return placerContainer;
+
 	}
 
 }

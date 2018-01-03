@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -18,13 +20,18 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 
 import commands.Command;
 import commands.logic.CommandSetWrapperToValue;
 import commands.system.CommandDeviceVibrate;
 
 import de.rwth.R;
+
 
 public class GuiSetup {
 
@@ -94,6 +101,10 @@ public class GuiSetup {
 		addImageButtonToView(rightView, command, imageId);
 	}
 
+	public void addImangeButtonToBottomView(int imageId, Command command) {
+		addImageButtonToView(bottomView, command, imageId);
+	}
+
 	public void addImangeButtonToTopView(int imageId, Command command) {
 		addImageButtonToView(topView, command, imageId);
 	}
@@ -119,10 +130,12 @@ public class GuiSetup {
 			});
 			target.addView(b);
 		} else {
-			Log.e(LOG_TAG, "No target specified (was null) "
+			Log.e(LOG_TAG, "No target specified (zwas null) "
 					+ "to add the image-button to.");
 		}
 	}
+
+
 
 	/**
 	 * @param target
@@ -208,7 +221,7 @@ public class GuiSetup {
 	 * @param v
 	 * @param weight
 	 *            2 or 3 is a good value
-	 * @param height
+	 * "@param height
 	 *            <150
 	 * @return
 	 */
@@ -227,24 +240,31 @@ public class GuiSetup {
 		t.setHintTextColor(Color.GRAY);
 		t.setMinimumWidth(200);
 		t.setSingleLine();
+
+		//slimbo: added this action done line to close keyboard
+		t.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+		//slimbo: added this to make text gray
+		t.setTextColor(Color.GRAY);
 		t.setSelectAllOnFocus(true);
-		t.setOnKeyListener(new OnKeyListener() {
+
+		t.setOnEditorActionListener(new EditText.OnEditorActionListener(){
+
 			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if (keyCode == KeyEvent.KEYCODE_ENTER) {
-					String text = t.getText().toString();
-					if (text.length() > 0) {
-						t.setText("");
-						//t.setHint(text);
-						//t.setText(text);
-						Log.d(LOG_TAG, "Gui-searchbar fiering text: '" + text
-								+ "'(length=" + text.length() + ")!");
-						return commandOnSearch.execute(text);
-					}
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+
+				if (actionId == EditorInfo.IME_ACTION_SEARCH
+						|| actionId == EditorInfo.IME_ACTION_DONE
+						|| event.getAction() == KeyEvent.ACTION_DOWN
+						&& event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+					return commandOnSearch.execute();
 				}
+
 				return false;
 			}
 		});
+
+
 		v.addView(t);
 		return t;
 	}
@@ -293,6 +313,10 @@ public class GuiSetup {
 
 	public LinearLayout getLeftView() {
 		return leftView;
+	}
+
+	public LinearLayout getLeftOuter() {
+		return leftOuter;
 	}
 
 	public LinearLayout getRightView() {

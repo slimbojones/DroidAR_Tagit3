@@ -10,6 +10,10 @@ import android.provider.MediaStore;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import system.Setup;
 import util.IO;
@@ -74,6 +78,18 @@ public class ArActivity extends Activity {
 				String stringValue = picturePath;
 				s.storeString(stringKey, stringValue);
 				assertTrue(stringValue.equals(s.loadString(stringKey)));
+
+				Toast toast;
+				toast = Toast.makeText(getBaseContext(), mySetupToUse.getGuiSetup().getRightView().getChildAt(0).toString(), Toast.LENGTH_LONG);
+				toast.show();
+
+				View ibView = mySetupToUse.getGuiSetup().getRightView().getChildAt(0);
+
+				if (ibView instanceof ImageButton) {
+
+
+					((ImageButton) ibView).setImageBitmap(IO.loadBitmapFromFile(picturePath));
+				}
 
 			}
 		}

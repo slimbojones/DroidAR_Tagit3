@@ -114,9 +114,7 @@ public abstract class Setup {
 	private final boolean useAccelAndMagnetoSensors;
 
 	private GuiSetup guiSetup;
-
 	private GLRenderer glRenderer;
-
 	private SystemUpdater worldUpdater;
 
 	private static Integer screenOrientation = Surface.ROTATION_90;
@@ -542,7 +540,7 @@ public abstract class Setup {
 	 * and then you can use the {@link GLFactory} object to add objects to the
 	 * created world. When your world is build, add it to the
 	 * {@link GL1Renderer} object by calling
-	 * {@link GL1Renderer#addRenderElement(worldData.Renderable)}
+	 * {@link "GL1Renderer#addRenderElement(worldData.Renderable)}
 	 * 
 	 * @param glRenderer
 	 *            here you should add your world(s)
@@ -584,9 +582,9 @@ public abstract class Setup {
 	 * @param eventManager
 	 * 
 	 * @param arView
-	 *            The {@link CustomGLSurfaceView#addOnTouchMoveAction(Action)}
+	 *            The {@link "CustomGLSurfaceView#addOnTouchMoveAction(Action)}
 	 *            -method can be used to react on touch-screen input
-	 * @param worldUpdater
+	 * "@param worldUpdater
 	 */
 	public abstract void _c_addActionsToEvents(EventManager eventManager,
 			CustomGLSurfaceView arView, SystemUpdater updater);

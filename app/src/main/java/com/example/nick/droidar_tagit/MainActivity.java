@@ -52,7 +52,4 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(mediaChooser, RESULT_LOAD_IMAGE);
     }
 
-
-
-
 }

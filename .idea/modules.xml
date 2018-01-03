@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DroidAR_Tagit.iml" filepath="$PROJECT_DIR$/DroidAR_Tagit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/DroidAR_Tagit.iml" filepath="$PROJECT_DIR$/.idea/DroidAR_Tagit.iml" />
+      <module fileurl="file://C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit\DroidAR_Tagit.iml" filepath="C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit\DroidAR_Tagit.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/droidAR/droidAR.iml" filepath="$PROJECT_DIR$/droidAR/droidAR.iml" />
     </modules>

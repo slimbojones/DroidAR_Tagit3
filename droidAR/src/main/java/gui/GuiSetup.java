@@ -18,10 +18,12 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -119,6 +121,7 @@ public class GuiSetup {
 			ImageButton b = new ImageButton(target.getContext());
 			// b.setBackgroundResource(BUTTON_BACKGROUND);
 			b.setImageResource(imageId);
+			//b.setBackgroundResource(imageId);
 			b.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -134,8 +137,6 @@ public class GuiSetup {
 					+ "to add the image-button to.");
 		}
 	}
-
-
 
 	/**
 	 * @param target
@@ -326,6 +327,9 @@ public class GuiSetup {
 	public LinearLayout getBottomView() {
 		return bottomView;
 	}
+	public LinearLayout getBottomOuter() {
+		return bottomOuter;
+	}
 
 	public LinearLayout getTopView() {
 		return topView;
@@ -348,7 +352,17 @@ public class GuiSetup {
 		 * TODO doesnt work anymore because of the additional linlayout in the
 		 * right bottom corner! fix it
 		 */
+
+
 		bottomOuter.setGravity(Gravity.CENTER);
+		bottomView.setGravity(Gravity.CENTER);
+
+		//bottomOuter.setOrientation(LinearLayout.HORIZONTAL);
+
+		bottomOuter.getChildAt(0).setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+
+		//bottomView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+		//bottomOuter.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
 	}
 
 	public void setLeftBackroundColor(int color) {

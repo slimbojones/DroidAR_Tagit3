@@ -45,11 +45,4 @@ public class MainActivity extends AppCompatActivity {
      */
     public native String stringFromJNI();
 
-    public void openMedia() {
-        Intent mediaChooser = new Intent(Intent.ACTION_GET_CONTENT);
-//comma-separated MIME types
-        mediaChooser.setType("video/*, image/*");
-        startActivityForResult(mediaChooser, RESULT_LOAD_IMAGE);
-    }
-
 }

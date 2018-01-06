@@ -1,18 +1,19 @@
 package com.example.nick.droidar_tagit;
 
-import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -31,7 +32,6 @@ import gl.CustomGLSurfaceView;
 import gl.GL1Renderer;
 import gl.GLCamera;
 import gl.GLFactory;
-import gl.GLText;
 import gl.animations.AnimationFaceToCamera;
 import gl.scenegraph.MeshComponent;
 import gui.GuiSetup;
@@ -45,15 +45,11 @@ import worldData.Obj;
 import worldData.SystemUpdater;
 import worldData.World;
 
-import android.app.Activity;
-import android.app.ListActivity;
-import android.os.Bundle;
-import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import java.io.ByteArrayOutputStream;
 
 public class TagitSetup extends Setup {
 
@@ -63,26 +59,31 @@ public class TagitSetup extends Setup {
 	private static int RESULT_LOAD_IMAGE = 1;
 
 	String textToDisplay = "enter text here";
-
-	private GLText searchText;
-
-	private GeoObj thisPosition;
-
-	public ImageButton previewImage;
-
 	public Obj placerContainer;
-
-	private boolean placeMode = false;
 
 	MeshComponent arrow;
 	Bitmap myBitmap;
 
+	private NameViewModel mModel;
 
+	private GuiSetup thisGuiSetup;
 
-	public void updatePreviewImage(){
+	private void toggleViews(){
 
-
+		if(thisGuiSetup.getBottomView().getChildAt(0).getVisibility() == View.VISIBLE){
+			thisGuiSetup.getBottomView().getChildAt(0).setVisibility(View.GONE);
+			thisGuiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
+			thisGuiSetup.getTopView().getChildAt(0).setVisibility(View.VISIBLE);
+			thisGuiSetup.getTopView().getChildAt(1).setVisibility(View.VISIBLE);
+		}
+		else{
+			thisGuiSetup.getBottomView().getChildAt(0).setVisibility(View.VISIBLE);
+			thisGuiSetup.getBottomView().getChildAt(1).setVisibility(View.VISIBLE);
+			thisGuiSetup.getTopView().getChildAt(0).setVisibility(View.INVISIBLE);
+			thisGuiSetup.getTopView().getChildAt(1).setVisibility(View.INVISIBLE);
+		}
 	}
+
 
 	@Override
 	public void _a_initFieldsIfNecessary() {
@@ -92,7 +93,6 @@ public class TagitSetup extends Setup {
 				"Error in DroidAR App");
 
 		placeObjectWrapper = new Wrapper();
-
 	}
 
 	@Override
@@ -102,10 +102,6 @@ public class TagitSetup extends Setup {
 		world = new World(camera);
 
 		GeoObj placerContainer = currentPosition;
-
-		thisPosition = currentPosition.copy();
-
-		//Obj placerContainer = new Obj();
 
 		placerContainer.setComp(objectFactory.newArrow());
 		world.add(placerContainer);
@@ -141,22 +137,10 @@ public class TagitSetup extends Setup {
 	@Override
 	public void _e2_addElementsToGuiSetup(final GuiSetup guiSetup, Activity context) {
 
-		//guiSetup.addButtonToTopView(new Command() {
-//
-		//	@Override
-		//	public boolean execute() {
-		//		final Obj placerContainer = new Obj();
-		//		placerContainer.setComp(null);
-		//		world.add(placerContainer);
-		//		placeObjectWrapper.setTo(placerContainer);
-		//		guiSetup.getTopView().getChildAt(0).setVisibility(View.GONE);
-//
-		//		return true;
-		//	}
-//
-		//}, "Add Tag");
+		thisGuiSetup = guiSetup;
 
-		guiSetup.addButtonToTopView(new Command() {
+		//CREATE IMAGE PICKER BUTTON
+		guiSetup.addImangeButtonToTopView(R.drawable.ic_insert_photo_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
@@ -165,126 +149,64 @@ public class TagitSetup extends Setup {
 				mediaChooser.setType("video/*, image/*");
 				((Activity) myTargetActivity).startActivityForResult(mediaChooser,RESULT_LOAD_IMAGE );
 
-				//IO.Settings s = new IO.Settings(getActivity(), "testSettings");
-				//String stringKey = "skey";
-				//String uriString = "";
-				//uriString = s.loadString(stringKey);
-
-				//Bitmap myBitmap = BitmapFactory.decodeFile(uriString);
-
-				//previewImage.setImageBitmap(myBitmap);
-
-				//Toast toast;
-				//toast = Toast.makeText(getActivity().getBaseContext(), uriString, Toast.LENGTH_LONG);
-				//toast.show();
-
-				//previewImage.setImageResource(myBitmap);
-
 				return true;
 			}
 
-		}, "");
+		});
 
-		View pickImageButton = guiSetup.getTopView().getChildAt(0);
-		if (pickImageButton instanceof Button) {
-
-			((Button) pickImageButton).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_photo_black_24px, 0,0,0);
-
-		}
-
-		guiSetup.addButtonToTopView(new Command() {
+		//CREATE TEXT PICKER BUTTON
+		guiSetup.addImangeButtonToTopView(R.drawable.ic_insert_comment_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
 
-				View ibView = guiSetup.getBottomView().getChildAt(0);
+				View ibView = guiSetup.getRightView().getChildAt(0);
 				if (ibView instanceof EditText) {
 
-					((EditText) ibView).setVisibility(View.VISIBLE);
+					ibView.setVisibility(View.VISIBLE);
 
-					((EditText) ibView).requestFocusFromTouch();
+					ibView.requestFocusFromTouch();
 					InputMethodManager lManager = (InputMethodManager)getActivity().getSystemService(getActivity().getBaseContext().INPUT_METHOD_SERVICE);
-					lManager.showSoftInput(((EditText) ibView), 0);
-
+					lManager.showSoftInput((ibView), 0);
 				}
-
 				return true;
 			}
+		});
 
-		}, "");
-
-		View pickTextButton = guiSetup.getTopView().getChildAt(1);
-		if (pickTextButton instanceof Button) {
-
-			((Button) pickTextButton).setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_comment_black_24px, 0,0,0);
-
-		}
-
-		guiSetup.addSearchbarToView(guiSetup.getBottomView(), new Command() {
+		//CREATE INVISIBLE EDITTEXT
+		guiSetup.addSearchbarToView(guiSetup.getRightView(), new Command() {
 
 			public boolean execute() {
-
 				newTextObject();
 				return false;
 			}
 
-			private Obj newTextObject() {
-				final Obj placerContainer = new Obj();
-
-				Vec textVec = new Vec(0,0,10);
-
-				int textSize = 2;
+			private void newTextObject() {
 
 				TextView v = new TextView(getActivity().getBaseContext());
-
-				View ibView = guiSetup.getBottomView().getChildAt(0);
+				v.setBackgroundColor(Color.DKGRAY);
+				View ibView = guiSetup.getRightView().getChildAt(0);
 				if (ibView instanceof EditText) {
 
 					if(((EditText) ibView).getText().toString().matches("")) {
-
 						textToDisplay = "Tagit";
 					}
 					else {
 						textToDisplay = ((EditText) ibView).getText().toString();
 					}
 				}
-
-				//((EditText) ibView).setTextColor(Color.GREEN);
-
 				v.setText(textToDisplay);
-				v.setBackgroundColor(Color.DKGRAY);
-
 				myBitmap = IO.loadBitmapFromView(v);
+				String textBitmapString = BitMapToString(myBitmap);
 
-				previewImage.setImageBitmap(myBitmap);
+				ArActivity myActivity = (ArActivity) myTargetActivity;
+				myActivity.addToUriPaths(textBitmapString, "type2");
 
-				arrow = TagitFactory.getInstance().newTexturedSquare("textBitmap"
-						+ textToDisplay, IO.loadBitmapFromView(v), textSize);
-				arrow.setPosition(textVec);
-				arrow.addAnimation(new AnimationFaceToCamera(camera));
-
-				arrow.setOnClickCommand(new Command() {
-					@Override
-					public boolean execute() {
-						placeObjectWrapper.setTo(placerContainer);
-						return true;
-					}
-				});
-				placerContainer.setComp(arrow);
-
-				world.add(placerContainer);
-				placeObjectWrapper.setTo(placerContainer);
-				guiSetup.getBottomView().getChildAt(1).setVisibility(View.VISIBLE);
-				guiSetup.getBottomView().getChildAt(2).setVisibility(View.VISIBLE);
-				//guiSetup.getBottomView().getChildAt(0).setVisibility(View.GONE);
-
-				return placerContainer;
 			}
 		}, textToDisplay);
 
-		View myEditText = guiSetup.getBottomView().getChildAt(0);
+		View myEditText = guiSetup.getRightView().getChildAt(0);
 		if (myEditText instanceof EditText) {
-
 
 			((EditText) myEditText).setWidth (0);
 			((EditText) myEditText).setHeight (0);
@@ -293,32 +215,7 @@ public class TagitSetup extends Setup {
 
 		}
 
-		guiSetup.addImangeButtonToRightView(R.drawable.t_icon, new Command() {
-
-			@Override
-			public boolean execute() {
-				//Toast toast;
-				//toast = Toast.makeText(getActivity().getBaseContext(), "image button pressed", Toast.LENGTH_LONG);
-				//toast.show();
-
-
-				View ibView = guiSetup.getRightView().getChildAt(0);
-				if (ibView instanceof ImageButton) {
-
-					//Bitmap bitmap = ((BitmapDrawable)(((ImageButton) ibView)).getD
-					Bitmap bitmap = ((BitmapDrawable)(((ImageButton) ibView)).getDrawable()).getBitmap();
-					placeObjectFromSelector(bitmap);
-					//placeMode = true;
-					guiSetup.getBottomView().getChildAt(1).setVisibility(View.VISIBLE);
-					guiSetup.getBottomView().getChildAt(2).setVisibility(View.VISIBLE);
-				}
-
-				return false;
-				}
-
-			}
-		);
-
+		//CREATE CHECK BUTTON TO PLACE OBJECT
 		guiSetup.addImangeButtonToBottomView(R.drawable.ic_check_circle_black_24px, new Command() {
 
 			@Override
@@ -328,95 +225,47 @@ public class TagitSetup extends Setup {
 				placerContainer.setComp(null);
 				world.add(placerContainer);
 				placeObjectWrapper.setTo(placerContainer);
-				guiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
-				guiSetup.getBottomView().getChildAt(2).setVisibility(View.GONE);
+				toggleViews();
 
 				return true;
 			}
-
 		});
 
+		//CREATE CANCEL BUTTON TO EXIT PLACEMENT
 		guiSetup.addImangeButtonToBottomView(R.drawable.ic_cancel_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
 
-				//final Obj placerContainer = new Obj();
-				//placerContainer.setComp(null);
-				//world.add(placerContainer);
-				//placeObjectWrapper.setTo(placerContainer);
-
 				placerContainer.remove(arrow);
-				//placeObjectWrapper.clear();
 
-				guiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
-				guiSetup.getBottomView().getChildAt(2).setVisibility(View.GONE);
+				toggleViews();
 
 				return true;
 			}
-
 		});
 
 		guiSetup.setTopViewCentered();
 		guiSetup.setBottomViewCentered();
 
-
-		int buttHeight = 500;
-		int buttWidth = 150;
-
-		View ibView = guiSetup.getRightView().getChildAt(0);
-		if (ibView instanceof ImageButton) {
-
-			previewImage = ((ImageButton) ibView);
-			//ImageButton imageB = (ImageButton) ibView;
-
-			previewImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-			// do what you want with imageView
-		}
-
-		guiSetup.getRightView().getLayoutParams().height = buttHeight;
-		guiSetup.getRightView().getLayoutParams().width = buttWidth;
+		guiSetup.getBottomView().getChildAt(0).setVisibility(View.GONE);
 		guiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
-		guiSetup.getBottomView().getChildAt(2).setVisibility(View.GONE);
 
+		android.view.ViewGroup.LayoutParams params2 = guiSetup.getBottomView().getChildAt(0).getLayoutParams();
+		params2.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+		guiSetup.getTopView().getChildAt(0).setLayoutParams(params2);
 
-		final String[] itemname ={
-				"Safari",
-				"Camera",
-				"Global",
-				"Safari",
-				"Camera",
-				"Global",
-				"Safari",
-				"Camera",
-				"Global",
-
-		};
-
-		Integer[] imgid={
-				R.drawable.ic_cancel_black_24px,
-				R.drawable.ic_font_download_white_24px,
-				R.drawable.ic_insert_photo_black_24px,
-				R.drawable.ic_cancel_black_24px,
-				R.drawable.ic_font_download_white_24px,
-				R.drawable.ic_insert_photo_black_24px,
-				R.drawable.ic_cancel_black_24px,
-				R.drawable.ic_font_download_white_24px,
-				R.drawable.ic_insert_photo_black_24px,
-
-		};
-
-
-		ListView DynamicListView = new ListView(getActivity().getBaseContext());
+		//TODO need a better way to set button size which is responsive to screen size
+		guiSetup.getBottomView().getChildAt(0).setPadding(100,37,100,37);
+		guiSetup.getBottomView().getChildAt(1).setPadding(100,37,100,37);
+		guiSetup.getTopView().getChildAt(0).setPadding(100,37,100,37);
+		guiSetup.getTopView().getChildAt(1).setPadding(100,37,100,37);
 
 		guiSetup.getLeftOuter().removeAllViews();
-
+		ListView DynamicListView = new ListView(getActivity().getBaseContext());
 		DynamicListView.setDivider(null);
 		DynamicListView.setDividerHeight(0);
-
 		DynamicListView.setVerticalScrollbarPosition(View.SCROLLBAR_POSITION_LEFT);
-
-		//guiSetup.getLeftView().addView(DynamicListView);
 		guiSetup.getLeftOuter().addView(DynamicListView);
 
 		ViewGroup.LayoutParams params = guiSetup.getLeftOuter().getLayoutParams();
@@ -425,24 +274,71 @@ public class TagitSetup extends Setup {
 		guiSetup.getLeftOuter().setLayoutParams(params);
 		guiSetup.getLeftOuter().requestLayout();
 
-		CustomListAdapter adapter=new CustomListAdapter(getActivity(), itemname, imgid);
-		//list=(ListView)findViewById(R.id.list);
-		DynamicListView.setAdapter(adapter);
+		ArActivity myActivity = (ArActivity) myTargetActivity;
+
+		mModel = ViewModelProviders.of((ArActivity) myTargetActivity).get(NameViewModel.class);
+
+		mModel.getUriPathList().observe((ArActivity) myTargetActivity, thisUriPathList -> {
+
+					CustomListAdapter adapter = new CustomListAdapter(myTargetActivity, thisUriPathList);
+					((ListView) DynamicListView).setAdapter(adapter);
+				});
 
 		DynamicListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 									int position, long id) {
-				// TODO Auto-generated method stub
-				String Selecteditem= itemname[+position];
-				Toast.makeText(getActivity().getApplicationContext(), Selecteditem, Toast.LENGTH_SHORT).show();
 
+				//TODO is this the best way to get the bitmap? seems slow
+				ImageView imageView = (ImageView) view.findViewById(R.id.icon);
+				BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
+				Bitmap yourBitmap = bitmapDrawable.getBitmap();
+				Toast.makeText(getActivity().getApplicationContext(), yourBitmap.toString(), Toast.LENGTH_SHORT).show();
+				placeObjectFromSelector(yourBitmap);
+
+				//String clickedPicturePath = parent.getItemAtPosition(position).toString();
+				//clickedPicturePath = clickedPicturePath.substring(1, clickedPicturePath.length() - 1);
+				//clickedPicturePath = clickedPicturePath.substring(0, clickedPicturePath.lastIndexOf(","));
+				//Toast.makeText(getActivity().getApplicationContext(), clickedPicturePath, Toast.LENGTH_SHORT).show();
+				//Bitmap selectedBitmap = IO.loadBitmapFromFile(clickedPicturePath);
+				//placeObjectFromSelector(selectedBitmap);
+
+				if(thisGuiSetup.getBottomView().getChildAt(0).getVisibility() == View.GONE){
+					toggleViews();
+				}
 
 			}
 		});
 
+		DynamicListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				final CharSequence[] items = {"Edit","Delete","Nevermind"};
+				AlertDialog.Builder builder = new AlertDialog.Builder(myActivity);
+				builder.setItems(items, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						//Toast.makeText(getActivity().getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
 
+						switch(item) {
+							case 0:
+								Toast.makeText(getActivity().getApplicationContext(), "Edits Coming Soon", Toast.LENGTH_SHORT).show();
+								break;
+							case 1:
+								ArActivity myActivity = (ArActivity) myTargetActivity;
+								myActivity.deleteFromUriPaths(position);
+								break;
+							default:
+
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+
+				return true;
+			}
+		});
 	}
 
 	public void placeObjectFromSelector(Bitmap selectedBitmap) {
@@ -450,22 +346,28 @@ public class TagitSetup extends Setup {
 		placerContainer = newPlacedObject(selectedBitmap);
 		world.add(placerContainer);
 		placeObjectWrapper.setTo(placerContainer);
-
 	}
 
 	public Obj newPlacedObject(Bitmap selectedBitmap) {
 
 		placerContainer = new Obj();
-		arrow = TagitFactory.getInstance()
-					.newTexturedSquare(
-							selectedBitmap.toString(),
-							selectedBitmap,5);
+		arrow = TagitFactory.getInstance().newTexturedSquare(selectedBitmap.toString(),selectedBitmap,5);
 
 		arrow.addAnimation(new AnimationFaceToCamera(camera));
 
 		placerContainer.setComp(arrow);
 		return placerContainer;
-
 	}
+
+	public String BitMapToString(Bitmap bitmap){
+		ByteArrayOutputStream baos=new  ByteArrayOutputStream();
+		bitmap.compress(Bitmap.CompressFormat.PNG,100, baos);
+		byte [] b=baos.toByteArray();
+		String temp= Base64.encodeToString(b, Base64.DEFAULT);
+		return temp;
+	}
+
+
+
 
 }

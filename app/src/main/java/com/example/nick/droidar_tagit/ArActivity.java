@@ -1,19 +1,30 @@
 package com.example.nick.droidar_tagit;
 
 import android.app.Activity;
+import android.arch.lifecycle.LifecycleActivity;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import system.Setup;
 import util.IO;
@@ -28,16 +39,18 @@ import static junit.framework.Assert.assertTrue;
  * @author Simon Heinen
  * 
  */
-public class ArActivity extends Activity {
+public class ArActivity extends LifecycleActivity {
 
 	private static final String LOG_TAG = "ArActivity";
 	private static Setup staticSetupHolder;
 	private Setup mySetupToUse;
 	private static int RESULT_LOAD_IMAGE = 1;
+	private NameViewModel mModel;
+	View DynamicListView;
 
 	/**
 	 * Called when the activity is first created.
-	 * 
+	 *
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +67,17 @@ public class ArActivity extends Activity {
 					+ "want to use this way of starting the AR-view!");
 			this.finish();
 		}
+
+
+		mModel = ViewModelProviders.of(this).get(NameViewModel.class);
+
+		//DynamicListView = mySetupToUse.getGuiSetup().getLeftOuter().getChildAt(0);
+
+		//mModel.getUriPathList().observe(this, thisUriPathList -> {
+
+		//CustomListAdapter adapter = new CustomListAdapter(this, thisUriPathList);
+		//	((ListView) DynamicListView).setAdapter(adapter);
+		//});
 	}
 
 	@Override
@@ -73,26 +97,32 @@ public class ArActivity extends Activity {
 				String picturePath = cursor.getString(columnIndex);
 				cursor.close();
 
-				IO.Settings s = new IO.Settings(this, "testSettings");
-				String stringKey = "skey";
-				String stringValue = picturePath;
-				s.storeString(stringKey, stringValue);
-				assertTrue(stringValue.equals(s.loadString(stringKey)));
-
-				Toast toast;
-				toast = Toast.makeText(getBaseContext(), mySetupToUse.getGuiSetup().getRightView().getChildAt(0).toString(), Toast.LENGTH_LONG);
-				toast.show();
-
-				View ibView = mySetupToUse.getGuiSetup().getRightView().getChildAt(0);
-
-				if (ibView instanceof ImageButton) {
-
-
-					((ImageButton) ibView).setImageBitmap(IO.loadBitmapFromFile(picturePath));
-				}
-
+				addToUriPaths(picturePath, "type1");
 			}
 		}
+	}
+	public void addToUriPaths(String textToAdd, String type){
+
+		List<List<String>> tempMasterList = mModel.getUriPathList().getValue();
+		List<String> innerList = new ArrayList<>();
+
+		innerList.add(textToAdd);
+		innerList.add(type);
+
+		tempMasterList.add(0,innerList);
+
+		mModel.getUriPathList().setValue(tempMasterList);
+
+	}
+
+	public void deleteFromUriPaths(int position){
+
+		List<List<String>> tempMasterList = mModel.getUriPathList().getValue();
+
+		tempMasterList.remove(position);
+
+		mModel.getUriPathList().setValue(tempMasterList);
+
 	}
 
 	public static void startWithSetup(Activity currentActivity, Setup setupToUse) {
@@ -110,6 +140,7 @@ public class ArActivity extends Activity {
 
 	private void runSetup() {
 		mySetupToUse.run(this);
+
 	}
 
 	@Override
@@ -124,6 +155,7 @@ public class ArActivity extends Activity {
 		if (mySetupToUse != null)
 			mySetupToUse.onResume(this);
 		super.onResume();
+
 	}
 
 	@Override
@@ -185,7 +217,6 @@ public class ArActivity extends Activity {
 			Log.d(LOG_TAG, "orientation changed to portrait");
 		super.onConfigurationChanged(newConfig);
 	}
-
 
 
 }

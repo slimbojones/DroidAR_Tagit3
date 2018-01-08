@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
@@ -23,8 +24,15 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import system.Setup;
 import util.IO;
@@ -47,6 +55,7 @@ public class ArActivity extends LifecycleActivity {
 	private static int RESULT_LOAD_IMAGE = 1;
 	private NameViewModel mModel;
 	View DynamicListView;
+	private StorageReference mStorage;
 
 	/**
 	 * Called when the activity is first created.
@@ -97,31 +106,42 @@ public class ArActivity extends LifecycleActivity {
 				String picturePath = cursor.getString(columnIndex);
 				cursor.close();
 
+				//mStorage = FirebaseStorage.getInstance().getReference();
+				//StorageReference filePath = mStorage.child("images/" + UUID.randomUUID().toString());
+
+				//filePath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>(){
+				//	@Override
+				//	public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+				//		Toast.makeText(ArActivity.this, "Upload Complete", Toast.LENGTH_SHORT).show();
+
+				//	}
+
+
+				//}).addOnFailureListener(new OnFailureListener() {
+				//	@Override
+				//	public void onFailure(@NonNull Exception e) {
+
+				//		Toast.makeText(ArActivity.this, "Upload Failed: " + e.toString(), Toast.LENGTH_LONG).show();
+				//	}
+				//});
+
 				addToUriPaths(picturePath, "type1");
 			}
 		}
 	}
 	public void addToUriPaths(String textToAdd, String type){
 
-		List<List<String>> tempMasterList = mModel.getUriPathList().getValue();
-		List<String> innerList = new ArrayList<>();
 
-		innerList.add(textToAdd);
-		innerList.add(type);
 
-		tempMasterList.add(0,innerList);
 
-		mModel.getUriPathList().setValue(tempMasterList);
 
+		Tagpost newTagpost = new Tagpost(textToAdd, type, 123);
+		mModel.addTagpost(newTagpost);
 	}
 
-	public void deleteFromUriPaths(int position){
+	public void deleteFromUriPaths(Tagpost tagpost){
 
-		List<List<String>> tempMasterList = mModel.getUriPathList().getValue();
-
-		tempMasterList.remove(position);
-
-		mModel.getUriPathList().setValue(tempMasterList);
+		mModel.addTagpost(tagpost);
 
 	}
 

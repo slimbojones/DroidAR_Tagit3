@@ -6,22 +6,37 @@ package com.example.nick.droidar_tagit;
  *
  */
 
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NameViewModel extends ViewModel {
+public class NameViewModel extends AndroidViewModel {
 
     private String TAG = NameViewModel.class.getSimpleName();
+    private AppDatabase appDatabase;
 
     // Create a LiveData with a String
-    private MutableLiveData<List<List<String>>> uriPathList;
+    private LiveData<List<Tagpost>> uriPathList;
 
-    public MutableLiveData<List<List<String>>> getUriPathList() {
+    public NameViewModel(Application application) {
+        super(application);
+
+        appDatabase = AppDatabase.getDatabase(this.getApplication());
+
+        uriPathList = appDatabase.itemAndPersonModel().getAllTagposts();
+    }
+
+
+
+    public LiveData<List<Tagpost>> getUriPathList() {
         if (uriPathList == null) {
             uriPathList = new MutableLiveData<>();
             loadUriPaths();
@@ -32,14 +47,52 @@ public class NameViewModel extends ViewModel {
         // do async operation to fetch users
         Handler myHandler = new Handler();
         myHandler.postDelayed(() -> {
-            List<List<String>> masterList = new ArrayList<>();
-            List<String> uriPathStringList = new ArrayList<>();
-            uriPathStringList.add("/storage/emulated/0/DCIM/100MEDIA/IMAG0181.jpg");
-            uriPathStringList.add("type1");
-            masterList.add(uriPathStringList);
-
-            uriPathList.setValue(masterList);
+            Tagpost uriPathStringList = new Tagpost("/storage/emulated/0/DCIM/100MEDIA/IMAG0181.jpg","type1", 123 );
+            appDatabase.itemAndPersonModel().addTagpost(uriPathStringList);
+            //uriPathList = appDatabase.itemAndPersonModel().getAllTagposts();
         }, 5000);
+
+
+    }
+
+    public void deleteTagpost(Tagpost tagpost) {
+        new deleteAsyncTask(appDatabase).execute(tagpost);
+    }
+
+    private static class deleteAsyncTask extends AsyncTask<Tagpost, Void, Void> {
+
+        private AppDatabase db;
+
+        deleteAsyncTask(AppDatabase appDatabase) {
+            db = appDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final Tagpost... params) {
+            db.itemAndPersonModel().deleteTagpost(params[0]);
+            return null;
+        }
+
+    }
+
+    public void addTagpost(Tagpost tagpost) {
+        new addAsyncTask(appDatabase).execute(tagpost);
+    }
+
+    private static class addAsyncTask extends AsyncTask<Tagpost, Void, Void> {
+
+        private AppDatabase db;
+
+        addAsyncTask(AppDatabase appDatabase) {
+            db = appDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final Tagpost... params) {
+            db.itemAndPersonModel().addTagpost(params[0]);
+            return null;
+        }
+
     }
 
     @Override

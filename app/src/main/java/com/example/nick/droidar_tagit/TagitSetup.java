@@ -2,12 +2,17 @@ package com.example.nick.droidar_tagit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +32,7 @@ import actions.ActionMoveCameraBuffered;
 import actions.ActionPlaceObject;
 import actions.ActionRotateCameraBuffered;
 import commands.Command;
+import commands.ui.CommandShowToast;
 import geo.GeoObj;
 import gl.CustomGLSurfaceView;
 import gl.GL1Renderer;
@@ -49,9 +55,15 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-import java.io.ByteArrayOutputStream;
+import com.google.gson.Gson;
 
-public class TagitSetup extends Setup {
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
+
+public class TagitSetup extends Setup implements View.OnLongClickListener, View.OnClickListener {
 
 	private GLCamera camera;
 	private World world;
@@ -60,13 +72,15 @@ public class TagitSetup extends Setup {
 
 	String textToDisplay = "enter text here";
 	public Obj placerContainer;
-
 	MeshComponent arrow;
 	Bitmap myBitmap;
-
 	private NameViewModel mModel;
-
 	private GuiSetup thisGuiSetup;
+	private RecyclerViewAdapter recyclerViewAdapter;
+
+
+
+
 
 	private void toggleViews(){
 
@@ -101,12 +115,16 @@ public class TagitSetup extends Setup {
 		camera = new GLCamera(new Vec(0, 0, 10));
 		world = new World(camera);
 
+
+
 		GeoObj placerContainer = currentPosition;
 
 		placerContainer.setComp(objectFactory.newArrow());
 		world.add(placerContainer);
 		placeObjectWrapper.setTo(placerContainer);
 		renderer.addRenderElement(world);
+
+		loadFromPublicWorld();
 
 	}
 
@@ -225,8 +243,10 @@ public class TagitSetup extends Setup {
 				placerContainer.setComp(null);
 				world.add(placerContainer);
 				placeObjectWrapper.setTo(placerContainer);
-				toggleViews();
 
+				saveToPublicWorld(placerContainer);
+
+				toggleViews();
 				return true;
 			}
 		});
@@ -238,9 +258,7 @@ public class TagitSetup extends Setup {
 			public boolean execute() {
 
 				placerContainer.remove(arrow);
-
 				toggleViews();
-
 				return true;
 			}
 		});
@@ -262,10 +280,10 @@ public class TagitSetup extends Setup {
 		guiSetup.getTopView().getChildAt(1).setPadding(100,37,100,37);
 
 		guiSetup.getLeftOuter().removeAllViews();
-		ListView DynamicListView = new ListView(getActivity().getBaseContext());
-		DynamicListView.setDivider(null);
-		DynamicListView.setDividerHeight(0);
-		DynamicListView.setVerticalScrollbarPosition(View.SCROLLBAR_POSITION_LEFT);
+		RecyclerView DynamicListView = new RecyclerView(getActivity().getBaseContext());
+		//DynamicListView.setDivider(null);
+		//DynamicListView.setDividerHeight(0);
+		//DynamicListView.setVerticalScrollbarPosition(View.SCROLLBAR_POSITION_LEFT);
 		guiSetup.getLeftOuter().addView(DynamicListView);
 
 		ViewGroup.LayoutParams params = guiSetup.getLeftOuter().getLayoutParams();
@@ -274,73 +292,23 @@ public class TagitSetup extends Setup {
 		guiSetup.getLeftOuter().setLayoutParams(params);
 		guiSetup.getLeftOuter().requestLayout();
 
-		ArActivity myActivity = (ArActivity) myTargetActivity;
+		View.OnLongClickListener myLongListener = this;
+		View.OnClickListener myListener = this;
 
 		mModel = ViewModelProviders.of((ArActivity) myTargetActivity).get(NameViewModel.class);
 
-		mModel.getUriPathList().observe((ArActivity) myTargetActivity, thisUriPathList -> {
+		recyclerViewAdapter = new RecyclerViewAdapter(new ArrayList<Tagpost>(), myLongListener, myListener  );
+		DynamicListView.setLayoutManager(new LinearLayoutManager((ArActivity) myTargetActivity));
+		DynamicListView.setAdapter(recyclerViewAdapter);
 
-					CustomListAdapter adapter = new CustomListAdapter(myTargetActivity, thisUriPathList);
-					((ListView) DynamicListView).setAdapter(adapter);
-				});
-
-		DynamicListView.setOnItemClickListener(new OnItemClickListener() {
-
+		mModel.getUriPathList().observe((ArActivity) myTargetActivity, new Observer<List<Tagpost>>() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-									int position, long id) {
-
-				//TODO is this the best way to get the bitmap? seems slow
-				ImageView imageView = (ImageView) view.findViewById(R.id.icon);
-				BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
-				Bitmap yourBitmap = bitmapDrawable.getBitmap();
-				Toast.makeText(getActivity().getApplicationContext(), yourBitmap.toString(), Toast.LENGTH_SHORT).show();
-				placeObjectFromSelector(yourBitmap);
-
-				//String clickedPicturePath = parent.getItemAtPosition(position).toString();
-				//clickedPicturePath = clickedPicturePath.substring(1, clickedPicturePath.length() - 1);
-				//clickedPicturePath = clickedPicturePath.substring(0, clickedPicturePath.lastIndexOf(","));
-				//Toast.makeText(getActivity().getApplicationContext(), clickedPicturePath, Toast.LENGTH_SHORT).show();
-				//Bitmap selectedBitmap = IO.loadBitmapFromFile(clickedPicturePath);
-				//placeObjectFromSelector(selectedBitmap);
-
-				if(thisGuiSetup.getBottomView().getChildAt(0).getVisibility() == View.GONE){
-					toggleViews();
-				}
-
+			public void onChanged(@Nullable List<Tagpost> thisUriPathList) {
+				recyclerViewAdapter.addItems(thisUriPathList);
 			}
 		});
 
-		DynamicListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				final CharSequence[] items = {"Edit","Delete","Nevermind"};
-				AlertDialog.Builder builder = new AlertDialog.Builder(myActivity);
-				builder.setItems(items, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int item) {
-						//Toast.makeText(getActivity().getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
-
-						switch(item) {
-							case 0:
-								Toast.makeText(getActivity().getApplicationContext(), "Edits Coming Soon", Toast.LENGTH_SHORT).show();
-								break;
-							case 1:
-								ArActivity myActivity = (ArActivity) myTargetActivity;
-								myActivity.deleteFromUriPaths(position);
-								break;
-							default:
-
-						}
-					}
-				});
-				AlertDialog alert = builder.create();
-				alert.show();
-
-				return true;
-			}
-		});
 	}
-
 	public void placeObjectFromSelector(Bitmap selectedBitmap) {
 
 		placerContainer = newPlacedObject(selectedBitmap);
@@ -353,9 +321,17 @@ public class TagitSetup extends Setup {
 		placerContainer = new Obj();
 		arrow = TagitFactory.getInstance().newTexturedSquare(selectedBitmap.toString(),selectedBitmap,5);
 
+
+		arrow.setOnClickCommand(new CommandShowToast(myTargetActivity,
+				"Item Found +1"));
+
 		arrow.addAnimation(new AnimationFaceToCamera(camera));
 
 		placerContainer.setComp(arrow);
+
+		//placerContainer.getGraphicsComponent()
+
+
 		return placerContainer;
 	}
 
@@ -368,6 +344,83 @@ public class TagitSetup extends Setup {
 	}
 
 
+	@Override
+	public boolean onLongClick(View view) {
+		final CharSequence[] items = {"Edit","Delete","Nevermind"};
+		AlertDialog.Builder builder = new AlertDialog.Builder((ArActivity) myTargetActivity);
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int item) {
+				//Toast.makeText(getActivity().getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
+
+				switch(item) {
+					case 0:
+						Toast.makeText(getActivity().getApplicationContext(), "Edits Coming Soon", Toast.LENGTH_SHORT).show();
+						break;
+					case 1:
+
+						Tagpost tagpost = (Tagpost) view.getTag();
+						mModel.deleteTagpost(tagpost);
+						break;
+					default:
+
+				}
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
+
+		return true;
+	}
+
+	@Override
+	public void onClick(View view) {
+
+		ImageView imageView = (ImageView) view.findViewById(R.id.icon);
+		BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
+		Bitmap yourBitmap = bitmapDrawable.getBitmap();
+		Toast.makeText(getActivity().getApplicationContext(), yourBitmap.toString(), Toast.LENGTH_SHORT).show();
+		placeObjectFromSelector(yourBitmap);
+
+		if(thisGuiSetup.getBottomView().getChildAt(0).getVisibility() == View.GONE){
+			toggleViews();
+		}
+
+	}
+
+	public void saveToPublicWorld(Obj myPlacerContainer){
+
+		Toast.makeText(getActivity().getApplicationContext(), "saveToPublicWorld started ", Toast.LENGTH_SHORT).show();
+
+		SharedPreferences mPrefs = myTargetActivity.getPreferences(MODE_PRIVATE);
+
+		SharedPreferences.Editor prefsEditor = mPrefs.edit();
+		Gson gson = new Gson();
+		String json = gson.toJson(myPlacerContainer);
+
+		Toast.makeText(getActivity().getApplicationContext(), "saveToPublicWorld: " + json, Toast.LENGTH_SHORT).show();
+		prefsEditor.putString("myPlacerContainer", json);
+		prefsEditor.commit();
 
 
+	}
+
+	public void loadFromPublicWorld(){
+
+
+
+		SharedPreferences mPrefs = myTargetActivity.getPreferences(MODE_PRIVATE);
+
+		Gson gson = new Gson();
+		String json = mPrefs.getString("myPlacerContainer", "");
+
+		Toast.makeText(getActivity().getApplicationContext(), "loadFromPublicWorld: " + json, Toast.LENGTH_LONG).show();
+		Obj obj = gson.fromJson(json, Obj.class);
+
+		//final Obj placerContainer = new Obj();
+		//placerContainer.setComp(null);
+		world.add(obj);
+		placeObjectWrapper.setTo(obj);
+
+
+	}
 }

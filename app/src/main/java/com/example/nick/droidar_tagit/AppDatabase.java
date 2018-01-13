@@ -19,7 +19,7 @@ import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 
 
 
-@Database(entities = {Tagpost.class}, version = 1)
+@Database(entities = {Tagpost.class, PlacedTag.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;
@@ -28,12 +28,13 @@ public abstract class AppDatabase extends RoomDatabase {
     public static AppDatabase getDatabase(Context context) {
         if (INSTANCE == null) {
             INSTANCE =
-                    Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "tagpost_db")
+                    Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "tagpost_db10")
                             .build();
         }
         return INSTANCE;
     }
 
     public abstract TagpostDao itemAndPersonModel();
+    public abstract PlacedTagDao placedTagModel();
 
 }

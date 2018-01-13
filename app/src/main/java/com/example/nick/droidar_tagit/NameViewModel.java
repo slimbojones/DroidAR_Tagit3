@@ -11,10 +11,14 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.util.Base64;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +36,8 @@ public class NameViewModel extends AndroidViewModel {
         appDatabase = AppDatabase.getDatabase(this.getApplication());
 
         uriPathList = appDatabase.itemAndPersonModel().getAllTagposts();
+
     }
-
-
 
     public LiveData<List<Tagpost>> getUriPathList() {
         if (uriPathList == null) {
@@ -51,8 +54,6 @@ public class NameViewModel extends AndroidViewModel {
             appDatabase.itemAndPersonModel().addTagpost(uriPathStringList);
             //uriPathList = appDatabase.itemAndPersonModel().getAllTagposts();
         }, 5000);
-
-
     }
 
     public void deleteTagpost(Tagpost tagpost) {
@@ -60,9 +61,7 @@ public class NameViewModel extends AndroidViewModel {
     }
 
     private static class deleteAsyncTask extends AsyncTask<Tagpost, Void, Void> {
-
         private AppDatabase db;
-
         deleteAsyncTask(AppDatabase appDatabase) {
             db = appDatabase;
         }
@@ -72,7 +71,6 @@ public class NameViewModel extends AndroidViewModel {
             db.itemAndPersonModel().deleteTagpost(params[0]);
             return null;
         }
-
     }
 
     public void addTagpost(Tagpost tagpost) {
@@ -80,9 +78,7 @@ public class NameViewModel extends AndroidViewModel {
     }
 
     private static class addAsyncTask extends AsyncTask<Tagpost, Void, Void> {
-
         private AppDatabase db;
-
         addAsyncTask(AppDatabase appDatabase) {
             db = appDatabase;
         }
@@ -92,7 +88,6 @@ public class NameViewModel extends AndroidViewModel {
             db.itemAndPersonModel().addTagpost(params[0]);
             return null;
         }
-
     }
 
     @Override
@@ -100,5 +95,7 @@ public class NameViewModel extends AndroidViewModel {
         super.onCleared();
         Log.d(TAG, "on cleared called");
     }
+
+
 
 }

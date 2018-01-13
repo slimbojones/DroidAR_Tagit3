@@ -1,7 +1,12 @@
 package com.example.nick.droidar_tagit;
 
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -20,11 +25,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private List<Tagpost> tagpostList;
     private View.OnLongClickListener longClickListener;
     private View.OnClickListener onClickListener;
+    private Context context;
 
-    public RecyclerViewAdapter(List<Tagpost> tagpostList, View.OnLongClickListener longClickListener, View.OnClickListener onClickListener ) {
+
+
+    public RecyclerViewAdapter(List<Tagpost> tagpostList, View.OnLongClickListener longClickListener, View.OnClickListener onClickListener, Context context ) {
         this.tagpostList = tagpostList;
         this.longClickListener = longClickListener;
         this.onClickListener = onClickListener;
+        this.context = context;
     }
 
     @Override
@@ -42,13 +51,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             holder.imageView.setImageBitmap(IO.loadBitmapFromFile(tagString));
         }
         else {
-            Bitmap tempBitmap = StringToBitMap(tagString);
+            TextView v = new TextView(context);
+            v.setTypeface(null, Typeface.BOLD);
+            v.setText(tagString);
+            v.setShadowLayer(0.01f, -2, 2,  Color.BLACK);
+            Bitmap tempBitmap = IO.loadBitmapFromView(v);
             holder.imageView.setImageBitmap(tempBitmap);
         }
-
         holder.itemView.setTag(tagpost);
         holder.itemView.setOnLongClickListener(longClickListener);
-
         holder.itemView.setOnClickListener(onClickListener);
     }
 
@@ -63,25 +74,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     static class RecyclerViewHolder extends RecyclerView.ViewHolder {
-
-
         ImageView imageView;
 
         RecyclerViewHolder(View view) {
             super(view);
             imageView = (ImageView) view.findViewById(R.id.icon);
-
         }
     }
 
-    public Bitmap StringToBitMap(String encodedString){
-        try {
-            byte [] encodeByte= Base64.decode(encodedString,Base64.DEFAULT);
-            Bitmap bitmap= BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
-            return bitmap;
-        } catch(Exception e) {
-            e.getMessage();
-            return null;
-        }
-    }
 }

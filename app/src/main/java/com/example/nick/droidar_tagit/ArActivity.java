@@ -8,6 +8,8 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -22,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -54,6 +57,7 @@ public class ArActivity extends LifecycleActivity {
 	private Setup mySetupToUse;
 	private static int RESULT_LOAD_IMAGE = 1;
 	private NameViewModel mModel;
+	private PlacedTagModel ptModel;
 	View DynamicListView;
 	private StorageReference mStorage;
 
@@ -79,6 +83,8 @@ public class ArActivity extends LifecycleActivity {
 
 
 		mModel = ViewModelProviders.of(this).get(NameViewModel.class);
+		ptModel = ViewModelProviders.of(this).get(PlacedTagModel.class);
+
 
 		//DynamicListView = mySetupToUse.getGuiSetup().getLeftOuter().getChildAt(0);
 
@@ -106,43 +112,17 @@ public class ArActivity extends LifecycleActivity {
 				String picturePath = cursor.getString(columnIndex);
 				cursor.close();
 
-				//mStorage = FirebaseStorage.getInstance().getReference();
-				//StorageReference filePath = mStorage.child("images/" + UUID.randomUUID().toString());
-
-				//filePath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>(){
-				//	@Override
-				//	public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-				//		Toast.makeText(ArActivity.this, "Upload Complete", Toast.LENGTH_SHORT).show();
-
-				//	}
-
-
-				//}).addOnFailureListener(new OnFailureListener() {
-				//	@Override
-				//	public void onFailure(@NonNull Exception e) {
-
-				//		Toast.makeText(ArActivity.this, "Upload Failed: " + e.toString(), Toast.LENGTH_LONG).show();
-				//	}
-				//});
-
 				addToUriPaths(picturePath, "type1");
 			}
 		}
 	}
 	public void addToUriPaths(String textToAdd, String type){
-
-
-
-
-
 		Tagpost newTagpost = new Tagpost(textToAdd, type, 123);
 		mModel.addTagpost(newTagpost);
 	}
 
 	public void deleteFromUriPaths(Tagpost tagpost){
-
 		mModel.addTagpost(tagpost);
-
 	}
 
 	public static void startWithSetup(Activity currentActivity, Setup setupToUse) {
@@ -237,6 +217,8 @@ public class ArActivity extends LifecycleActivity {
 			Log.d(LOG_TAG, "orientation changed to portrait");
 		super.onConfigurationChanged(newConfig);
 	}
+
+
 
 
 }

@@ -123,6 +123,15 @@ public class EventManager implements LocationListener, SensorEventListener {
 					.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 			sensorManager.registerListener(this, sensorFusion,
 					SensorManager.SENSOR_DELAY_GAME);
+
+			//slimbo every two seconds
+			Sensor proximitySensor =
+					sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+			if(proximitySensor == null) {
+				Log.e(LOG_TAG, "Proximity sensor not available.");
+			}
+			sensorManager.registerListener(this,
+					proximitySensor, 2 * 1000 * 1000);
 		} else {
 			// Register orientation Sensor Listener:
 			Sensor orientationSensor = sensorManager.getDefaultSensor(11);// Sensor.TYPE_ROTATION_VECTOR);
@@ -183,6 +192,14 @@ public class EventManager implements LocationListener, SensorEventListener {
 				if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
 					onOrientationChangedList.get(i)
 							.onOrientationChanged(values);
+				}
+				if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+					//onOrientationChangedList.get(i)
+					//		.onOrientationChanged(values);
+
+					Log.d(LOG_TAG, "proximity values: " + Float.toString(values[0]));
+					Log.d(LOG_TAG, "proximity maxRange: " + Float.toString(event.sensor.getMaximumRange()));
+
 				}
 			}
 		}

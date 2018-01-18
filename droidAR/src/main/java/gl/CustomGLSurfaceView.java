@@ -13,6 +13,7 @@ import util.Log;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -226,8 +227,23 @@ public class CustomGLSurfaceView extends GLSurfaceView implements
 			float distanceY) {
 		if (onTouchListeners != null) {
 			for (int i = 0; i < onTouchListeners.size(); i++) {
+				if(distanceX > 50){
+					distanceX = 50;
+				}
+				Log.d("distanceX: ", Float.toString(distanceX));
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+					Log.d("distanceX: ", "axis value 0: " + Float.toString(e1.getAxisValue(0)));
+					Log.d("distanceX: ", "axis value 0 max: " + Float.toString(e1.getDevice().getMotionRange(0).getMax()));
+					Log.d("distanceX: ", "axis value 1 max: " + Float.toString(e1.getDevice().getMotionRange(1).getMax()));
+				}
+
 				onTouchListeners.get(i).onTouchMove(e1, e2, distanceX,
-						distanceY);
+								distanceY);
+				//onTouchListeners.get(i).onTouchMove(e1, e2, distanceX,
+				//		distanceY);
+
+
+
 			}
 		}
 	}

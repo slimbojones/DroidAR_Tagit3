@@ -5,6 +5,9 @@ import system.TaskManager;
 import util.Log;
 import util.Wrapper;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -129,6 +133,54 @@ public class GuiSetup {
 						vibrateCommand.execute();
 					}
 					c.execute();
+				}
+			});
+			target.addView(b);
+		} else {
+			Log.e(LOG_TAG, "No target specified (zwas null) "
+					+ "to add the image-button to.");
+		}
+	}
+
+	public void addSeekbarToTopView(Drawable imageDrawable, Command c ) {
+		addSeekbarToView(topView, c, imageDrawable);
+	}
+
+	public void addSeekbarToView(LinearLayout target, final Command c,
+									 Drawable imageDrawable) {
+		if (target != null) {
+			SeekBar b = new SeekBar(target.getContext());
+
+			b.setThumb(imageDrawable);
+
+			LayoutParams lp = new LayoutParams(500, 110);
+			b.setLayoutParams(lp);
+
+			b.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+			b.setPadding(15,15,15,0);
+			b.setThumbOffset(15);
+
+			b.setVisibility(View.GONE);
+			b.setBackgroundColor(Color.LTGRAY);
+
+			b.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+				public void onStopTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub
+					System.out.println(".....111.......");
+				}
+
+				public void onStartTrackingTouch(SeekBar arg0) {
+
+					// TODO Auto-generated method stub
+
+					System.out.println(".....222.......");
+				}
+
+				public void onProgressChanged(SeekBar arg0, int distance, boolean arg2) {
+					// TODO Auto-generated method stub
+					c.execute();
+					System.out.println(".....333......."+distance);
 				}
 			});
 			target.addView(b);

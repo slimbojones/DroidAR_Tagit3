@@ -16,13 +16,13 @@ public class PlacedTag {
     public int userid;
     public String bitmapString;
     public String tagTypeString;
-    public String longString;
-    public String latString;
-    public String altString;
+    public double longString;
+    public double latString;
+    public double altString;
     //@TypeConverters(DateConverter.class)
     //private Date borrowDate;
 
-    public PlacedTag(String bitmapString, String tagTypeString, String longString, String latString, String altString) {
+    public PlacedTag(String bitmapString, String tagTypeString, double longString, double latString, double altString) {
         this.bitmapString = bitmapString;
         this.tagTypeString = tagTypeString;
         this.longString = longString;
@@ -37,23 +37,26 @@ public class PlacedTag {
     public String gettagTypeString() {
         return tagTypeString;
     }
-    public String getlongString() {
+    public double getlongString() {
         return longString;
     }
-    public String getlatString() {
+    public double getlatString() {
         return latString;
     }
-    public String getaltString() {
+    public double getaltString() {
         return altString;
     }
     public int getuserid() {
         return userid;
     }
+    public int getid() {
+        return id;
+    }
 
     public void setbitmapString(String bitmapString){ this.bitmapString = bitmapString; }
     public void settagTypeString(String tagTypeString){ this.tagTypeString = tagTypeString; }
-    public void setlongString(String longString){ this.longString = longString; }
-    public void setlatString(String latString){ this.latString = latString; }
-    public void setaltString(String altString){ this.altString = altString; }
+    public void setlongString(double longString){ this.longString = longString; }
+    public void setlatString(double latString){ this.latString = latString; }
+    public void setaltString(double altString){ this.altString = altString; }
 
 }

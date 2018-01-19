@@ -871,6 +871,9 @@ public abstract class Setup {
 	}
 
 	public boolean onKeyDown(Activity a, int keyCode, KeyEvent event) {
+
+		Log.d("SUkeydown", "keycode: " + Integer.toString(keyCode));
+		Log.d("SUkeydown", "keyevent: " + event.toString());
 		// if the keyAction isnt defined return false:
 		return EventManager.getInstance().onKeyDown(keyCode, event);
 	}

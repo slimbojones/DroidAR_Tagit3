@@ -1,0 +1,15 @@
+1.  Frustrum Culling - indicators pointing to off-screen objects
+2.  Centralized database hosted on public server
+3.  Make placed objects clickable
+4.  Error handling when video is chosen
+5.  Compass?
+6.  Put distance text next to object
+7.  On click bring object to foreground
+8.  Allow objects to be placed above user (factor in altitude)
+9.  Create methods for showing an image from a link
+10. Insert PlacedTags individually instead of deleting and reloading all
+11. onClick for PlacedTags should make the object still and enlarged to fill screen
+    Options
+    a. Camera zooms in closer (like when the trackball is scrolled up) but un-zooms on touch release
+    b. Create a new view overlaying camera view that
+12. Open browser on URL click

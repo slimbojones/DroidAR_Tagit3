@@ -71,6 +71,15 @@ public abstract class MeshComponent implements RenderableEntity,
 	private Command myOnMapClickCommand;
 	private Command myOnDoubleClickCommand;
 
+	private int placedTagId;
+
+	public int getPlacedTagId() {
+		return placedTagId;
+	}
+	public void setPlacedTagId(int placedTag) {
+		this.placedTagId = placedTag;
+	}
+
 	/**
 	 * how to extract euler angles from a rotation matrix
 	 * http://paulbourke.net/geometry/eulerangle/ TODO provide a method for this

@@ -1,10 +1,12 @@
 package com.example.nick.droidar_tagit;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.arch.lifecycle.LifecycleActivity;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -12,6 +14,9 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -188,6 +193,8 @@ public class ArActivity extends LifecycleActivity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		Log.d("ARkeydown", "keycode: " + Integer.toString(keyCode));
+		Log.d("ARkeydown", "keyevent: " + event.toString());
 		if ((mySetupToUse != null)
 				&& (mySetupToUse.onKeyDown(this, keyCode, event)))
 			return true;
@@ -218,7 +225,39 @@ public class ArActivity extends LifecycleActivity {
 		super.onConfigurationChanged(newConfig);
 	}
 
+	public void showAlertDialog(int tagid)
+	{
 
+		runOnUiThread(new Runnable() {
+			public void run()
+			{
+				final CharSequence[] items = {"Delete All","Delete","Nevermind"};
+				AlertDialog.Builder builder = new AlertDialog.Builder(ArActivity.this);
+				builder.setItems(items, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						//Toast.makeText(getActivity().getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
+						switch(item) {
+							case 0:
+								ptModel.deleteAllPlacedTags();
+								Toast.makeText(ArActivity.this, "All Tags Deleted", Toast.LENGTH_SHORT).show();
+								break;
+							case 1:
+
+								ptModel.deletePlacedTagById(tagid);
+								Toast.makeText(ArActivity.this, "Deleted" + Integer.toString(tagid), Toast.LENGTH_SHORT).show();
+								//Tagpost tagpost = (Tagpost) view.getTag();
+								//mModel.deleteTagpost(tagpost);
+								break;
+							default:
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+
+			}
+		});
+	}
 
 
 }

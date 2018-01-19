@@ -63,7 +63,7 @@ public class PlacedTagModel extends AndroidViewModel {
 
             String iconString = "first setup";
 
-            PlacedTag newPlacedTag = new PlacedTag(iconString,"type2", "0","0","0" );
+            PlacedTag newPlacedTag = new PlacedTag(iconString,"type2", 0.0f,0.0f, 0.0f);
             appDatabase.placedTagModel().addPlacedTag(newPlacedTag);
 
             Log.d("PlacedTag", "newPlacedTag added in PlacedTagwModel");
@@ -119,6 +119,23 @@ public class PlacedTagModel extends AndroidViewModel {
         @Override
         protected Void doInBackground(final PlacedTag... params) {
             db.placedTagModel().deleteAllPlacedTags();
+            return null;
+        }
+    }
+
+    public void deletePlacedTagById(int placedTagId) {
+        new deleteByIdAsyncTask(appDatabase).execute(placedTagId);
+    }
+
+    private static class deleteByIdAsyncTask extends AsyncTask<Integer , Void, Void> {
+        private AppDatabase db;
+        deleteByIdAsyncTask(AppDatabase appDatabase) {
+            db = appDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final Integer... params) {
+            db.placedTagModel().deletePlacedTagById(params[0]);
             return null;
         }
     }

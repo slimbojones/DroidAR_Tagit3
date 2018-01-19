@@ -585,6 +585,7 @@ public class TagitFactory {
 			@Override
 			public void draw(GL10 gl, Renderable parent) {
 				CordinateAxis.draw(gl);
+
 			}
 
 		};

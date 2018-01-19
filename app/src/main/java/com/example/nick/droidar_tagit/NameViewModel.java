@@ -90,6 +90,23 @@ public class NameViewModel extends AndroidViewModel {
         }
     }
 
+    public void deleteAllTagposts() {
+        new NameViewModel.deleteAllTagpostsAsyncTask(appDatabase).execute();
+    }
+
+    private static class deleteAllTagpostsAsyncTask extends AsyncTask<Tagpost, Void, Void> {
+        private AppDatabase db;
+        deleteAllTagpostsAsyncTask(AppDatabase appDatabase) {
+            db = appDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final Tagpost... params) {
+            db.itemAndPersonModel().deleteAllTagposts();
+            return null;
+        }
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

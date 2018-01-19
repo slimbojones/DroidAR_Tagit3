@@ -4,12 +4,15 @@ import system.Setup;
 import system.TaskManager;
 import util.Log;
 import util.Wrapper;
+
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
@@ -156,12 +159,39 @@ public class GuiSetup {
 			LayoutParams lp = new LayoutParams(500, 110);
 			b.setLayoutParams(lp);
 
+
 			b.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 			b.setPadding(15,15,15,0);
 			b.setThumbOffset(15);
 
 			b.setVisibility(View.GONE);
 			b.setBackgroundColor(Color.LTGRAY);
+			final Context mycontext = target.getContext();
+
+			b.setOnTouchListener(new SeekBar.OnTouchListener()
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event)
+				{
+					int action = event.getAction();
+					switch (action)
+					{
+						case MotionEvent.ACTION_DOWN:
+							// Disallow ScrollView to intercept touch events.
+							v.getParent().requestDisallowInterceptTouchEvent(true);
+							break;
+
+						case MotionEvent.ACTION_UP:
+							// Allow ScrollView to intercept touch events.
+							v.getParent().requestDisallowInterceptTouchEvent(false);
+							break;
+					}
+
+					// Handle Seekbar touch events.
+					v.onTouchEvent(event);
+					return true;
+				}
+			});
 
 			b.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -173,8 +203,9 @@ public class GuiSetup {
 				public void onStartTrackingTouch(SeekBar arg0) {
 
 					// TODO Auto-generated method stub
+					Toast.makeText(mycontext, "started sliding", Toast.LENGTH_SHORT);
 
-					System.out.println(".....222.......");
+					Log.d("seekbar", " started");
 				}
 
 				public void onProgressChanged(SeekBar arg0, int distance, boolean arg2) {

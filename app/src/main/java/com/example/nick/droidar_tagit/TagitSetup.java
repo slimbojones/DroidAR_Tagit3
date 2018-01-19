@@ -3,48 +3,38 @@ package com.example.nick.droidar_tagit;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Base64;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.example.nick.droidar_tagit.ArActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.microedition.khronos.opengles.GL10;
 
 import actions.Action;
-import actions.ActionBufferedCameraAR;
 import actions.ActionCalcRelativePos;
 import actions.ActionMoveCameraBuffered;
-import actions.ActionMoveObject;
-import actions.ActionPlaceObject;
 import actions.ActionRotateCameraBuffered;
 import actions.ActionWASDMovement;
-import actions.ActionWaitForAccuracy;
 import commands.Command;
 import commands.ui.CommandShowToast;
 import components.ViewPosCalcerComp;
@@ -59,7 +49,6 @@ import gui.GuiSetup;
 import system.ErrorHandler;
 import system.EventManager;
 import system.Setup;
-import system.TouchEventInterface;
 import util.IO;
 import util.Vec;
 import util.Wrapper;
@@ -68,20 +57,6 @@ import worldData.Obj;
 import worldData.SystemUpdater;
 import worldData.Updateable;
 import worldData.World;
-
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class TagitSetup extends Setup implements View.OnLongClickListener, View.OnClickListener  {
 
@@ -139,27 +114,17 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 	@Override
 	public void _b_addWorldsToRenderer(GL1Renderer renderer,
-			GLFactory objectFactory, GeoObj currentPosition) {
+									   GLFactory objectFactory, GeoObj currentPosition) {
 		camera = new GLCamera(new Vec(0, 0, 10));
 		world = new World(camera);
 		renderer.addRenderElement(world);
-
-		//loadFromPublicWorld();
 	}
 
 	@Override
 	public void _c_addActionsToEvents(EventManager eventManager,
-			CustomGLSurfaceView arView, SystemUpdater updater) {
-
-		//wasdAction = new ActionWASDMovement(camera, 25, 50, 20);
-		//arView.addOnTouchMoveListener(wasdAction);
-
-		//arView.addOnTouchMoveAction(new ActionBufferedCameraAR(camera));
+									  CustomGLSurfaceView arView, SystemUpdater updater) {
 
 		Action rot1 = new ActionRotateCameraBuffered(camera);
-
-		//slimbo:  changed maxDistance from 50 to 20
-		//Action rot2 = new ActionPlaceObject(camera, placeObjectWrapper, 20);
 
 		viewPosCalcer = new ViewPosCalcerComp(camera, 150, 0.1f) {
 			@Override
@@ -171,7 +136,17 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 					MoveComp m = obj.getComp(MoveComp.class);
 					if (m != null) {
 
-						targetVec = new Vec(targetVec.x, targetVec.y - objectDepth, targetVec.z);
+						float azimuthAngle;
+						float ewValue;
+						float nsValue;
+
+						azimuthAngle = camera.getCameraAnglesInDegree()[0];
+
+						ewValue = (float) Math.sin(azimuthAngle) * objectDepth;
+						nsValue = (float) Math.cos(azimuthAngle) * objectDepth;
+
+
+						targetVec = new Vec(targetVec.x + ewValue, targetVec.y + nsValue, targetVec.z);
 						m.myTargetPos = targetVec;
 						Log.d("m.myTargetPos", "m.myTargetPos: "+ m.myTargetPos.toString());
 
@@ -179,6 +154,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 						Log.d("myCamera", "camera pos: "+ camera.getPosition().toString());
 						Log.d("myCamera", "camera rotMatrix: "+ Integer.toString(camera.getRotationMatrix().length));
 						Log.d("myCamera", "camera getNewPosition: "+ camera.getMyNewPosition().toString());
+						Log.d("myCamera", "camera getCameraAnglesInDegree: "+ Float.toString(camera.getCameraAnglesInDegree()[0]));
 					}
 				}
 			}
@@ -186,27 +162,22 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		moveComp = new MoveComp(4);
 
 		updater.addObjectToUpdateCycle(rot1);
-		//updater.addObjectToUpdateCycle(rot2);
 
 		eventManager.addOnOrientationChangedAction(rot1);
-		//eventManager.addOnOrientationChangedAction(rot2);
-		//eventManager.addOnTrackballAction(new ActionMoveCameraBuffered(camera,
-		//		5, 25));
-
-		//eventManager.addOnTrackballAction(new ActionMoveObject(
-		//		placeObjectWrapper, camera, 10, 100));
 
 		//TODO find out if I need this or not
 		eventManager.addOnLocationChangedAction(new ActionCalcRelativePos(
 				world, camera));
 
 
+
+		//eventManager.addOnTrackballAction(new ActionMoveCameraBuffered(camera,
+		//		5, 25));
 	}
 
 	@Override
 	public void _d_addElementsToUpdateThread(SystemUpdater worldUpdater) {
 		worldUpdater.addObjectToUpdateCycle(world);
-		//worldUpdater.addObjectToUpdateCycle(wasdAction);
 	}
 
 	@Override
@@ -226,7 +197,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 				return true;
 			}
-
 		});
 
 		//CREATE TEXT PICKER BUTTON
@@ -261,13 +231,10 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 					MoveComp mover = ((Obj) placeObjectWrapper.getObject())
 							.getComp(MoveComp.class);
 					if (mover != null) {
+						float attenuation = .5f;
 
-						//arrow.setPosition(new Vec(arrow.getPosition().x, (float) distance ,arrow.getPosition().z));
+						objectDepth = (float) distance * attenuation;
 
-						//mover.myTargetPos.y = distance;
-						//mover.update(5, mover.getMyParent());
-
-						objectDepth = (float) distance;
 						Log.d("objDepth", Float.toString(objectDepth));
 						Toast.makeText(getActivity().getApplicationContext(), "mover.myTargetPos.y: " + Float.toString(mover.myTargetPos.y), Toast.LENGTH_SHORT).show();
 					} else {
@@ -344,16 +311,20 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 				Log.d ("PlacedTag", "on check mynewposition: " + camera.getMyNewPosition().toString() );
 				Log.d ("PlacedTag", "arrow getPosition: " + arrow.getPosition().toString() );
 
-				String longString = Double.toString(arrow.getPosition().x);
-				String latString = Double.toString(arrow.getPosition().y);
-				String altString = Double.toString(arrow.getPosition().z);
+				GeoObj newGeo = new GeoObj();
+				newGeo.setVirtualPosition(arrow.getPosition());
+				newGeo.setComp(arrow);
+				newGeo.refreshVirtualPosition();
+
+				double longString = newGeo.getLongitude();
+				double latString = newGeo.getLatitude();
+				double altString = arrow.getPosition().z;
 
 				PlacedTag newPlacedTag = new PlacedTag(bitmapString, typeString, longString, latString, altString);
 				ptModel.addPlacedTag(newPlacedTag);
 
 				toggleViews();
 
-				//loadFromPublicWorld();
 				return true;
 			}
 		});
@@ -420,9 +391,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 				loadFromPublicWorld();
 			}
 		});
-
-		//loadFromPublicWorld();
-
 	}
 
 	//Clicking item on toolbelt
@@ -448,12 +416,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 		placerContainer = new Obj();
 
-		//Vec pos =camera.getGPSPositionVec();
-
-		//final GeoObj placerContainer = new GeoObj(pos.y, pos.x, pos.z);
-
-		//GeoObj placerContainer2 = new GeoObj(camera.getGPSLocation().getLongitude(), camera.getGPSLocation().getLatitude(), camera.getGPSLocation().getAltitude() );
-		//placerContainer.setPosition(placerContainer2.getPosition());
 		arrow = TagitFactory.getInstance().newTexturedSquare(selectedBitmap.toString(),selectedBitmap,5);
 
 		arrow.setOnClickCommand(new CommandShowToast(myTargetActivity,
@@ -469,23 +431,22 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		placeObjectWrapper.setTo(placerContainer);
 	}
 
-
-
 	@Override
 	public boolean onLongClick(View view) {
-		final CharSequence[] items = {"Edit","Delete","Nevermind"};
+		final CharSequence[] items = {"Delete ALL From Toolbelt","Delete From Toolbelt","Nevermind"};
 		AlertDialog.Builder builder = new AlertDialog.Builder((ArActivity) myTargetActivity);
 		builder.setItems(items, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int item) {
 				//Toast.makeText(getActivity().getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
 				switch(item) {
 					case 0:
-						ptModel.deleteAllPlacedTags();
-						Toast.makeText(getActivity().getApplicationContext(), "Edits Coming Soon", Toast.LENGTH_SHORT).show();
+						mModel.deleteAllTagposts();
+						Toast.makeText(getActivity().getApplicationContext(), "Toolbelt Cleared", Toast.LENGTH_SHORT).show();
 						break;
 					case 1:
 						Tagpost tagpost = (Tagpost) view.getTag();
 						mModel.deleteTagpost(tagpost);
+						Toast.makeText(getActivity().getApplicationContext(), "Removed from Tooolbelt", Toast.LENGTH_SHORT).show();
 						break;
 					default:
 				}
@@ -496,8 +457,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 		return true;
 	}
-
-
 
 	public void loadFromPublicWorld(){
 
@@ -523,21 +482,14 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		catch(Exception e){
 			Log.d("PlacedTag", "tagitsetup 417" + e.toString());
 		}
-
-
 	}
 	private void spawnObj(PlacedTag placedTag) {
 
 		String bitmapString = placedTag.getbitmapString();
 		String typeString = placedTag.gettagTypeString();
-		String longString = placedTag.getlongString();
-		String latString = placedTag.getlatString();
-		String altString = placedTag.getaltString();
-
-		GeoObj tempGeoObj = new GeoObj(Double.parseDouble(longString), Double.parseDouble(latString), Double.parseDouble(altString));
-		Log.d("PlacedTag", "longString: " + longString);
-		Log.d("PlacedTag", "latString: " + latString);
-		Log.d("PlacedTag", "altString: " + altString);
+		double longString = placedTag.getlongString();
+		double latString = placedTag.getlatString();
+		double altString = placedTag.getaltString();
 
 		Bitmap tempBitmap;
 
@@ -547,6 +499,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		}
 		else{
 			TextView v = new TextView(myTargetActivity);
+			v.setBackgroundColor(Color.DKGRAY);
 			v.setTypeface(null, Typeface.BOLD);
 			v.setShadowLayer(0.01f, -2, 2,  Color.BLACK);
 			v.setText(bitmapString);
@@ -554,34 +507,22 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		}
 
 		MeshComponent mesh = TagitFactory.getInstance().newTexturedSquare(tempBitmap.toString(), tempBitmap, 5);
+		GeoObj newGeo2 = new GeoObj(latString,longString, altString, mesh, true);
 
+		mesh.setPlacedTagId(placedTag.getid());
 
-		placerContainer = new Obj();
-
-		mesh.setPosition(new Vec(Float.parseFloat(longString), Float.parseFloat(latString), Float.parseFloat(altString)));
 		mesh.addChild(new AnimationFaceToCamera(camera, 0.5f));
 		mesh.setOnClickCommand(new Command() {
 
 			@Override
 			public boolean execute() {
-
-				world.remove(mesh);
-				//Toast.makeText(getActivity().getApplicationContext(), "item removed", Toast.LENGTH_SHORT).show();
-
+				//ptModel.deletePlacedTag(placedTag);
+				ArActivity myActivity = (ArActivity) myTargetActivity;
+				myActivity.showAlertDialog(placedTag.getid());
 				return true;
 			}
-
 		});
-
-		//placerContainer.setComp(viewPosCalcer);
-		//placerContainer.setComp(moveComp);
-
-		placerContainer.setComp(mesh);
-
-		//CommandShowToast.show(myTargetActivity, "Object spawned at "
-		//		+ tempGeoObj.getMySurroundGroup().getPosition());
-		world.add(placerContainer);
+		world.add(newGeo2);
 	}
-
 
 }

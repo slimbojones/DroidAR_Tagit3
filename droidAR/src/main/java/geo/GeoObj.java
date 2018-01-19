@@ -113,7 +113,7 @@ public class GeoObj extends Obj implements HasDebugInformation {
 	 * @param meshToSurround
 	 * @param calcVirtulPos
 	 */
-	private GeoObj(double lati, double longi, double alti,
+	public GeoObj(double lati, double longi, double alti,
 			MeshComponent meshToSurround, boolean calcVirtulPos) {
 		// a geoObj itself should not have a color so null:
 		setMyLatitude(lati);

@@ -279,6 +279,9 @@ public class EventManager implements LocationListener, SensorEventListener {
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 
+		Log.d("keydown", "keycode:" + Integer.toString(keyCode));
+		Log.d("keydown", "key event: " + event.toString());
+
 		if (keyCode >= 19 && keyCode <= 22) {
 			/*
 			 * if the keycode is on of the numbers from 19 to 22 it is a pseudo

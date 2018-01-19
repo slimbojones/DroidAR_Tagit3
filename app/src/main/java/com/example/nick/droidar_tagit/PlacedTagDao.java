@@ -21,7 +21,7 @@ public interface PlacedTagDao {
     LiveData<List<PlacedTag>> getPlacedTags();
 
     @Query("select * from PlacedTag where id = :id")
-    PlacedTag getPlacedTagbyId(String id);
+    PlacedTag getPlacedTagbyId(int id);
 
     @Insert(onConflict = REPLACE)
     void addPlacedTag(com.example.nick.droidar_tagit.PlacedTag placedTag);
@@ -31,6 +31,9 @@ public interface PlacedTagDao {
 
     @Query("DELETE FROM PlacedTag")
     public void deleteAllPlacedTags();
+
+    @Query("DELETE FROM PlacedTag where id = :id")
+    public void deletePlacedTagById(int id);
 
 }
 

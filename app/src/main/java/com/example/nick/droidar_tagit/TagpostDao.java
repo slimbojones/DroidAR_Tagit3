@@ -35,6 +35,9 @@ public interface TagpostDao {
     @Delete
     void deleteTagpost(com.example.nick.droidar_tagit.Tagpost tagpost);
 
+    @Query("DELETE FROM Tagpost")
+    public void deleteAllTagposts();
+
 }
 
 

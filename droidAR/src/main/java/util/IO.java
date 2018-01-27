@@ -13,9 +13,11 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ImageView;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -99,9 +101,11 @@ public class IO {
 	 *            for example "/sdcard/abc.PNG"
 	 * @return
 	 */
-	public static Bitmap loadBitmapFromFile(String imagePath) {
+	public static Bitmap loadBitmapFromFile(String imagePath, int sampleSize) {
 		BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 		bitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+		//slimbo - reduced sampleSize for thumbnails - reduces memory consumption
+		bitmapOptions.inSampleSize = sampleSize;
 		return BitmapFactory.decodeFile(imagePath, bitmapOptions);
 	}
 
@@ -126,6 +130,8 @@ public class IO {
 		}
 		return null;
 	}
+
+
 
 	/**
 	 * turns any view in a bitmap to load it to openGL eg

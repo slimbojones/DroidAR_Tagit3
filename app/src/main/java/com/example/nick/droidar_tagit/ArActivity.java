@@ -6,6 +6,7 @@ import android.arch.lifecycle.LifecycleActivity;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -20,6 +21,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -61,6 +63,7 @@ public class ArActivity extends LifecycleActivity {
 	private static Setup staticSetupHolder;
 	private Setup mySetupToUse;
 	private static int RESULT_LOAD_IMAGE = 1;
+	private static int IMAGE_SEARCH_CODE = 5;
 	private NameViewModel mModel;
 	private PlacedTagModel ptModel;
 	View DynamicListView;
@@ -90,14 +93,49 @@ public class ArActivity extends LifecycleActivity {
 		mModel = ViewModelProviders.of(this).get(NameViewModel.class);
 		ptModel = ViewModelProviders.of(this).get(PlacedTagModel.class);
 
+		Intent intent = getIntent();
+		Uri data = intent.getData();
 
-		//DynamicListView = mySetupToUse.getGuiSetup().getLeftOuter().getChildAt(0);
 
-		//mModel.getUriPathList().observe(this, thisUriPathList -> {
 
-		//CustomListAdapter adapter = new CustomListAdapter(this, thisUriPathList);
-		//	((ListView) DynamicListView).setAdapter(adapter);
-		//});
+
+
+		//TODO handle the error when user presses back button after launching activity from outside application
+		//"Fail to connect to camera service"
+
+		if( getIntent().getExtras() != null)
+		{
+			//Log.d("imageURL", " data.getEncodedPath().toString(): " + data.getEncodedPath().toString());
+			// Figure out what to do based on the intent type
+			if (intent.getType().indexOf("image/") != -1) {
+				Toast.makeText(getApplicationContext(), "Image recognized", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "Only Image Links allowed", Toast.LENGTH_LONG).show();
+
+
+			} else if (intent.getType().equals("text/plain")) {
+				ArActivity.startWithSetup(ArActivity.this, new TagitSetup() {
+				});
+
+				String imageUri = intent.getStringExtra(Intent.EXTRA_TEXT);
+				//String imageUri = (String) intent.getParcelableExtra(Intent.EXTRA_TEXT);
+				//Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_TEXT);
+				//TODO verify that link works and url is valid image file
+				Log.d("imageURL", "imageUri : " +imageUri);
+				if (imageUri != null && !imageUri.isEmpty()) {
+
+					String textToDisplay = imageUri;
+
+					if (textToDisplay.startsWith("http://") || textToDisplay.startsWith("https://")) {
+						addToUriPaths(textToDisplay, "type3");
+					}
+					else {
+						addToUriPaths(textToDisplay, "type2");
+					}
+
+				}
+			}
+
+		}
 	}
 
 	@Override
@@ -118,6 +156,12 @@ public class ArActivity extends LifecycleActivity {
 				cursor.close();
 
 				addToUriPaths(picturePath, "type1");
+			}
+			if (requestCode == IMAGE_SEARCH_CODE) {
+
+				Uri uri = data.getData();
+
+				Toast.makeText(getApplicationContext(), "Image search URI: " + uri.toString(), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -142,6 +186,8 @@ public class ArActivity extends LifecycleActivity {
 		currentActivity.startActivityForResult(new Intent(currentActivity,
 				ArActivity.class), requestCode);
 	}
+
+
 
 	private void runSetup() {
 		mySetupToUse.run(this);
@@ -245,8 +291,7 @@ public class ArActivity extends LifecycleActivity {
 
 								ptModel.deletePlacedTagById(tagid);
 								Toast.makeText(ArActivity.this, "Deleted" + Integer.toString(tagid), Toast.LENGTH_SHORT).show();
-								//Tagpost tagpost = (Tagpost) view.getTag();
-								//mModel.deleteTagpost(tagpost);
+
 								break;
 							default:
 						}

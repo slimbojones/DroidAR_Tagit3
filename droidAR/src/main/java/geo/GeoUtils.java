@@ -47,6 +47,7 @@ import android.provider.Settings;
  * @author Spobo
  * 
  */
+@SuppressWarnings("LossyEncoding")
 public class GeoUtils {
 
 	private static final String LOG_TAG = "Geo Utils";
@@ -66,7 +67,7 @@ public class GeoUtils {
 	 * you have to convert to decimal degrees.
 	 * 
 	 * Example usage: <br>
-	 * 16° 19' 28,29" to 16,324525°
+	 * 16ï¿½ 19' 28,29" to 16,324525ï¿½
 	 * 
 	 * @param degree
 	 *            16
@@ -74,7 +75,7 @@ public class GeoUtils {
 	 *            19
 	 * @param seconds
 	 *            28,29
-	 * @return 16,324525°
+	 * @return 16,324525ï¿½
 	 */
 	public static double convertDegreesMinutesSecondsToDecimalDegrees(
 			double degree, double minutes, double seconds) {

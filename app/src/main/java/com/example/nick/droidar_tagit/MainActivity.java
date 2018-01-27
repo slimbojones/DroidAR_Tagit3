@@ -5,7 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -21,7 +22,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Button b = new Button(this);
+        b.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_t_logo));
         b.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -31,8 +34,11 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
-       // setContentView(R.layout.activity_main);
         setContentView(b);
+
+
+
+        //b.performClick();
 
         // Example of a call to a native method
        // TextView tv = (TextView) findViewById(R.id.sample_text);

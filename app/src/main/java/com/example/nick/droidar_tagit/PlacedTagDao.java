@@ -36,4 +36,3 @@ public interface PlacedTagDao {
     public void deletePlacedTagById(int id);
 
 }
-

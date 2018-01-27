@@ -2,6 +2,7 @@ package com.example.nick.droidar_tagit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -11,6 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,9 +27,18 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.nick.droidar_tagit.ArActivity;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -58,12 +70,15 @@ import worldData.SystemUpdater;
 import worldData.Updateable;
 import worldData.World;
 
+
+
 public class TagitSetup extends Setup implements View.OnLongClickListener, View.OnClickListener  {
 
 	private GLCamera camera;
 	private World world;
 	private Wrapper placeObjectWrapper;
 	private static int RESULT_LOAD_IMAGE = 1;
+	private static int IMAGE_SEARCH_CODE = 5;
 
 	String textToDisplay = "enter text here";
 	public Obj placerContainer;
@@ -82,7 +97,8 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 	private MoveComp moveComp;
 
-	private ActionWASDMovement wasdAction;
+	Map<Long, GeoObj> renderedArray = new HashMap<Long,GeoObj>();
+
 	private float objectDepth = 0.0f;
 
 	private void toggleViews(){
@@ -92,14 +108,16 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			thisGuiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
 			thisGuiSetup.getTopView().getChildAt(0).setVisibility(View.VISIBLE);
 			thisGuiSetup.getTopView().getChildAt(1).setVisibility(View.VISIBLE);
-			thisGuiSetup.getTopView().getChildAt(2).setVisibility(View.GONE);
+			thisGuiSetup.getTopView().getChildAt(2).setVisibility(View.VISIBLE);
+			thisGuiSetup.getTopView().getChildAt(3).setVisibility(View.GONE);
 		}
 		else{
 			thisGuiSetup.getBottomView().getChildAt(0).setVisibility(View.VISIBLE);
 			thisGuiSetup.getBottomView().getChildAt(1).setVisibility(View.VISIBLE);
 			thisGuiSetup.getTopView().getChildAt(0).setVisibility(View.GONE);
 			thisGuiSetup.getTopView().getChildAt(1).setVisibility(View.GONE);
-			thisGuiSetup.getTopView().getChildAt(2).setVisibility(View.VISIBLE);
+			thisGuiSetup.getTopView().getChildAt(2).setVisibility(View.GONE);
+			thisGuiSetup.getTopView().getChildAt(3).setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -118,6 +136,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		camera = new GLCamera(new Vec(0, 0, 10));
 		world = new World(camera);
 		renderer.addRenderElement(world);
+		placerContainer = new Obj();
 	}
 
 	@Override
@@ -217,13 +236,31 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 				return true;
 			}
 		});
+
+		//CREATE WEB PICKER BUTTON
+		guiSetup.addImangeButtonToTopView(R.drawable.ic_public_black_24px, new Command() {
+
+			@Override
+			public boolean execute() {
+
+
+				//Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+				//intent.putExtra(SearchManager.QUERY, "fish"); // query contains search string
+				//myTargetActivity.startActivityForResult(intent, IMAGE_SEARCH_CODE);
+
+				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://images.google.com/"));
+				myTargetActivity.startActivityForResult(browserIntent, IMAGE_SEARCH_CODE);
+
+				return true;
+			}
+		});
 		//
 		guiSetup.addSeekbarToTopView(myTargetActivity.getResources().getDrawable(R.drawable.ic_location_on_black_24px), new Command() {
 
 			@Override
 			public boolean execute() {
 
-				SeekBar mySeekbar = (SeekBar) guiSetup.getTopView().getChildAt(2);
+				SeekBar mySeekbar = (SeekBar) guiSetup.getTopView().getChildAt(3);
 				int distance = mySeekbar.getProgress();
 				Toast.makeText(getActivity().getApplicationContext(), "distance: " + Integer.toString(distance), Toast.LENGTH_SHORT).show();
 
@@ -275,7 +312,16 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 				myBitmap = IO.loadBitmapFromView(v);
 
 				ArActivity myActivity = (ArActivity) myTargetActivity;
-				myActivity.addToUriPaths(textToDisplay, "type2");
+
+				//TODO verify that link works and url is valid image file
+
+				if (textToDisplay.startsWith("http://") || textToDisplay.startsWith("https://")) {
+					myActivity.addToUriPaths(textToDisplay, "type3");
+				}
+				else {
+					myActivity.addToUriPaths(textToDisplay, "type2");
+				}
+
 				return false;
 			}
 		}, textToDisplay);
@@ -295,10 +341,11 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			@Override
 			public boolean execute() {
 
-				final Obj placerContainer = new Obj();
-				placerContainer.setComp(null);
-				world.add(placerContainer);
-				placeObjectWrapper.setTo(placerContainer);
+				//final Obj placerContainer = new Obj();
+				//placerContainer.setComp(null);
+				//world.add(placerContainer);
+				//placeObjectWrapper.setTo(placerContainer);
+				placerContainer.remove(arrow);
 
 				//TODO find a way to check what tagType it is
 				String bitmapString = currentTagpost.getitemString();
@@ -322,6 +369,9 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 				PlacedTag newPlacedTag = new PlacedTag(bitmapString, typeString, longString, latString, altString);
 				ptModel.addPlacedTag(newPlacedTag);
+
+				world.remove(newGeo);
+
 
 				toggleViews();
 
@@ -356,6 +406,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		guiSetup.getBottomView().getChildAt(1).setPadding(100,37,100,37);
 		guiSetup.getTopView().getChildAt(0).setPadding(100,37,100,37);
 		guiSetup.getTopView().getChildAt(1).setPadding(100,37,100,37);
+		guiSetup.getTopView().getChildAt(2).setPadding(100,37,100,37);
 
 		guiSetup.getLeftOuter().removeAllViews();
 		RecyclerView DynamicListView = new RecyclerView(getActivity().getBaseContext());
@@ -404,6 +455,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 		currentTagpost = (Tagpost)view.getTag();
 		yourBitmap = bitmapDrawable.getBitmap();
+
 		//Toast.makeText(getActivity().getApplicationContext(), yourBitmap.toString(), Toast.LENGTH_SHORT).show();
 		placeObjectFromSelector(yourBitmap);
 
@@ -414,7 +466,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 	public void placeObjectFromSelector(Bitmap selectedBitmap) {
 
-		placerContainer = new Obj();
+
 
 		arrow = TagitFactory.getInstance().newTexturedSquare(selectedBitmap.toString(),selectedBitmap,5);
 
@@ -460,24 +512,56 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 	public void loadFromPublicWorld(){
 
-		world.getAllItems().clear();
+		//world.getAllItems().clear();
 
 		LiveData<List<PlacedTag>> list2;
+		int placedCount = 0;
+		Set<Long> worldTagIds = new HashSet<>();
 
 		try {
 			list2 = ptModel.getPlacedTagList();
 			Log.d("PlacedTag", "first in list" + list2.toString());
+			Log.d("loadPW", "renderedArraybefore: " + renderedArray.toString());
 
 			int listSize = list2.getValue().size();
 			if(list2 !=null && listSize>0) {
 				for (int j = 0; j < listSize; j++){
 
 					PlacedTag thisPlacedTag = list2.getValue().get(j);
-					spawnObj(thisPlacedTag);
+					int tagId = thisPlacedTag.getid();
+					//worldTagIds is a list of everything that SHOULD be rendered
+					worldTagIds.add((long) tagId);
+
+					//Log.d("loadPW", "placedGeoObj: " + placedGeoObj.toString());
+					if(renderedArray.containsKey((long) tagId)) {
+						Log.d("loadPW", "geoObj already exists: " + Long.toString(tagId));
+						//already rendered, skip and try the next one
+					}
+					else{
+						spawnObj(thisPlacedTag);
+						placedCount++;
+					}
 				}
 			}
 
-			Toast.makeText(getActivity().getApplicationContext(), Integer.toString(listSize) + "items spawned", Toast.LENGTH_SHORT).show();
+			Map<Long, GeoObj> renderedArrayCopy = new HashMap<>();
+			renderedArrayCopy = new HashMap<Long, GeoObj>(renderedArray);
+			//the following is a list of everything that is currently rendered that needs to be removed
+			renderedArrayCopy.keySet().removeAll(worldTagIds);
+			Log.d("loadPW", "worldTagids: " + worldTagIds.toString());
+			Log.d("loadPW", "renderedArrayCopy: " + renderedArrayCopy.toString());
+
+			for (Map.Entry<Long, GeoObj> entry : renderedArrayCopy.entrySet()) {
+				Long key = entry.getKey();
+				GeoObj value = entry.getValue();
+				Log.d("loadPW", "geoobj from renderedArray: " + renderedArray.get(key).toString());
+				renderedArray.remove(key);
+				world.remove(value);
+				Log.d("loadPW", "removed item: " + Long.toString(key));
+			}
+			Log.d("loadPW", "world efficientList: " + world.getAllItems().toString());
+			Log.d("loadPW", "renderedArrayafter: " + renderedArray.toString());
+			Toast.makeText(getActivity().getApplicationContext(), Integer.toString(placedCount) + "item(s) spawned", Toast.LENGTH_SHORT).show();
 		}
 		catch(Exception e){
 			Log.d("PlacedTag", "tagitsetup 417" + e.toString());
@@ -490,26 +574,53 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		double longString = placedTag.getlongString();
 		double latString = placedTag.getlatString();
 		double altString = placedTag.getaltString();
+		long ptId = (long) placedTag.getid();
 
-		Bitmap tempBitmap;
+		final Bitmap[] tempBitmap = new Bitmap[1];
 
 		if(typeString.equals("type1")){
 
-			tempBitmap = (IO.loadBitmapFromFile(bitmapString));
+			tempBitmap[0] = (IO.loadBitmapFromFile(bitmapString, 2));
 		}
-		else{
+		else if(typeString.equals("type2")){
 			TextView v = new TextView(myTargetActivity);
 			v.setBackgroundColor(Color.DKGRAY);
 			v.setTypeface(null, Typeface.BOLD);
 			v.setShadowLayer(0.01f, -2, 2,  Color.BLACK);
 			v.setText(bitmapString);
-			tempBitmap = (IO.loadBitmapFromView(v));
+			tempBitmap[0] = (IO.loadBitmapFromView(v));
+		}
+		else {
+			Uri myURI = Uri.parse(bitmapString);
+			//Picasso.with(context).load(myURI).into(holder.imageView);
+			Picasso.with(myTargetActivity)
+					.load(myURI)
+					.into(new Target() {
+						@Override
+						public void onBitmapLoaded (final Bitmap bitmap, Picasso.LoadedFrom from) {
+							tempBitmap[0] =bitmap;
+						}
+
+						@Override
+						public void onPrepareLoad(Drawable placeHolderDrawable) {}
+
+						@Override
+						public void onBitmapFailed(Drawable errorDrawable) {}
+					});
+			//tempBitmap = IO.loadBitmapFromURL(tagString);
+			//util.Log.d("imageURL", "RVA tagstring: " + tagString);
 		}
 
-		MeshComponent mesh = TagitFactory.getInstance().newTexturedSquare(tempBitmap.toString(), tempBitmap, 5);
+		MeshComponent mesh = TagitFactory.getInstance().newTexturedSquare(tempBitmap[0].toString(), tempBitmap[0], 5);
+		//tempBitmap[0].recycle();
 		GeoObj newGeo2 = new GeoObj(latString,longString, altString, mesh, true);
 
-		mesh.setPlacedTagId(placedTag.getid());
+		renderedArray.put(ptId,newGeo2);
+		Log.d("loadPW", "spawnObj mesh: " + mesh.toString());
+		Log.d("loadPW", "added to renderedArray2: " + Long.toString(ptId));
+		Log.d("loadPW", "spawnObj renderedArray: " + renderedArray.toString());
+
+		//mesh.setPlacedTagId(placedTag.getid());
 
 		mesh.addChild(new AnimationFaceToCamera(camera, 0.5f));
 		mesh.setOnClickCommand(new Command() {

@@ -13,7 +13,11 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +36,13 @@ import com.squareup.picasso.Target;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,7 +89,9 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 	private World world;
 	private Wrapper placeObjectWrapper;
 	private static int RESULT_LOAD_IMAGE = 1;
+	static final int REQUEST_IMAGE_CAPTURE = 3;
 	private static int IMAGE_SEARCH_CODE = 5;
+
 
 	String textToDisplay = "enter text here";
 	public Obj placerContainer;
@@ -109,6 +122,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			thisGuiSetup.getTopView().getChildAt(0).setVisibility(View.VISIBLE);
 			thisGuiSetup.getTopView().getChildAt(1).setVisibility(View.VISIBLE);
 			thisGuiSetup.getTopView().getChildAt(2).setVisibility(View.VISIBLE);
+			thisGuiSetup.getTopView().getChildAt(4).setVisibility(View.VISIBLE);
 			thisGuiSetup.getTopView().getChildAt(3).setVisibility(View.GONE);
 		}
 		else{
@@ -117,6 +131,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			thisGuiSetup.getTopView().getChildAt(0).setVisibility(View.GONE);
 			thisGuiSetup.getTopView().getChildAt(1).setVisibility(View.GONE);
 			thisGuiSetup.getTopView().getChildAt(2).setVisibility(View.GONE);
+			thisGuiSetup.getTopView().getChildAt(4).setVisibility(View.GONE);
 			thisGuiSetup.getTopView().getChildAt(3).setVisibility(View.VISIBLE);
 		}
 	}
@@ -188,8 +203,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		eventManager.addOnLocationChangedAction(new ActionCalcRelativePos(
 				world, camera));
 
-
-
 		//eventManager.addOnTrackballAction(new ActionMoveCameraBuffered(camera,
 		//		5, 25));
 	}
@@ -209,6 +222,8 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 			@Override
 			public boolean execute() {
+
+				//TODO set to only images, no video
 
 				Intent mediaChooser = new Intent(Intent.ACTION_GET_CONTENT);
 				mediaChooser.setType("video/*, image/*");
@@ -243,13 +258,15 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			@Override
 			public boolean execute() {
 
+				Intent i = new Intent(myTargetActivity.getApplicationContext(),
+				         SearchActivity.class);
 
-				//Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-				//intent.putExtra(SearchManager.QUERY, "fish"); // query contains search string
-				//myTargetActivity.startActivityForResult(intent, IMAGE_SEARCH_CODE);
+				//i.putExtra("result", imageResult);
+				// TODO, wanted to test this
 
-				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://images.google.com/"));
-				myTargetActivity.startActivityForResult(browserIntent, IMAGE_SEARCH_CODE);
+
+				myTargetActivity.startActivityForResult(i, IMAGE_SEARCH_CODE);
+
 
 				return true;
 			}
@@ -288,6 +305,21 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 					return true;
 				}
 				return false;
+			}
+		});
+
+		//CREATE CAMERA BUTTON
+		guiSetup.addImangeButtonToTopView(R.drawable.ic_photo_camera_black_24px, new Command() {
+
+			@Override
+			public boolean execute() {
+
+				Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+				if (takePictureIntent.resolveActivity(myTargetActivity.getPackageManager()) != null) {
+					myTargetActivity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+				}
+
+				return true;
 			}
 		});
 
@@ -347,6 +379,10 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 				//placeObjectWrapper.setTo(placerContainer);
 				placerContainer.remove(arrow);
 
+				MediaPlayer mPlayer = MediaPlayer.create(context, R.raw.spray);
+				mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+				mPlayer.start();
+
 				//TODO find a way to check what tagType it is
 				String bitmapString = currentTagpost.getitemString();
 				String typeString = currentTagpost.gettagType();
@@ -397,16 +433,20 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		guiSetup.getBottomView().getChildAt(0).setVisibility(View.GONE);
 		guiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
 
-		android.view.ViewGroup.LayoutParams params2 = guiSetup.getBottomView().getChildAt(0).getLayoutParams();
-		params2.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-		guiSetup.getTopView().getChildAt(0).setLayoutParams(params2);
+		//android.view.ViewGroup.LayoutParams params2 = guiSetup.getBottomView().getChildAt(0).getLayoutParams();
+		//params2.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+		//guiSetup.getTopView().getChildAt(0).setLayoutParams(params2);
 
 		//TODO need a better way to set button size which is responsive to screen size
-		guiSetup.getBottomView().getChildAt(0).setPadding(100,37,100,37);
-		guiSetup.getBottomView().getChildAt(1).setPadding(100,37,100,37);
-		guiSetup.getTopView().getChildAt(0).setPadding(100,37,100,37);
-		guiSetup.getTopView().getChildAt(1).setPadding(100,37,100,37);
-		guiSetup.getTopView().getChildAt(2).setPadding(100,37,100,37);
+		int buttonPadding = 0;
+
+
+		guiSetup.getBottomView().getChildAt(0).setPadding(100,buttonPadding,100,buttonPadding);
+		guiSetup.getBottomView().getChildAt(1).setPadding(100,buttonPadding,100,buttonPadding);
+		guiSetup.getTopView().getChildAt(0).setPadding(100,buttonPadding,100,buttonPadding);
+		guiSetup.getTopView().getChildAt(1).setPadding(100,buttonPadding,100,buttonPadding);
+		guiSetup.getTopView().getChildAt(2).setPadding(100,buttonPadding,100,buttonPadding);
+		guiSetup.getTopView().getChildAt(4).setPadding(100,buttonPadding,100,buttonPadding);
 
 		guiSetup.getLeftOuter().removeAllViews();
 		RecyclerView DynamicListView = new RecyclerView(getActivity().getBaseContext());
@@ -449,6 +489,10 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 	public void onClick(View view) {
 
 		objectDepth = 0.0f;
+
+		MediaPlayer mPlayer = MediaPlayer.create(myTargetActivity, R.raw.shake);
+		mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+		mPlayer.start();
 
 		ImageView imageView = (ImageView) view.findViewById(R.id.icon);
 		BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
@@ -635,5 +679,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		});
 		world.add(newGeo2);
 	}
+
 
 }

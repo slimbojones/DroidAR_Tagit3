@@ -26,6 +26,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -126,9 +127,8 @@ public class GuiSetup {
 			int imageId) {
 		if (target != null) {
 			ImageButton b = new ImageButton(target.getContext());
-			// b.setBackgroundResource(BUTTON_BACKGROUND);
+
 			b.setImageResource(imageId);
-			//b.setBackgroundResource(imageId);
 			b.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -139,6 +139,15 @@ public class GuiSetup {
 				}
 			});
 			target.addView(b);
+
+			LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) b.getLayoutParams();
+			params.height = 125;
+			params.width = 300;
+			b.setLayoutParams(params);
+			b.setScaleType(ImageView.ScaleType.FIT_CENTER);
+			b.setBackgroundColor(Color.LTGRAY);
+			//b.setBackgroundResource(0);
+			b.getBackground().setAlpha(128);
 		} else {
 			Log.e(LOG_TAG, "No target specified (zwas null) "
 					+ "to add the image-button to.");
@@ -156,16 +165,17 @@ public class GuiSetup {
 
 			b.setThumb(imageDrawable);
 
-			LayoutParams lp = new LayoutParams(500, 110);
+			LayoutParams lp = new LayoutParams(600, 125);
 			b.setLayoutParams(lp);
 
 
 			b.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-			b.setPadding(15,15,15,0);
+			b.setPadding(15,0,15,0);
 			b.setThumbOffset(15);
 
 			b.setVisibility(View.GONE);
 			b.setBackgroundColor(Color.LTGRAY);
+			b.getBackground().setAlpha(128);
 			final Context mycontext = target.getContext();
 
 			b.setOnTouchListener(new SeekBar.OnTouchListener()

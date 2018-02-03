@@ -13,6 +13,8 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -63,7 +65,8 @@ public class ArActivity extends LifecycleActivity {
 	private static Setup staticSetupHolder;
 	private Setup mySetupToUse;
 	private static int RESULT_LOAD_IMAGE = 1;
-	private static int IMAGE_SEARCH_CODE = 5;
+	static final int REQUEST_IMAGE_CAPTURE = 3;
+	static final int IMAGE_SEARCH_CODE = 5;
 	private NameViewModel mModel;
 	private PlacedTagModel ptModel;
 	View DynamicListView;
@@ -89,32 +92,41 @@ public class ArActivity extends LifecycleActivity {
 			this.finish();
 		}
 
-
 		mModel = ViewModelProviders.of(this).get(NameViewModel.class);
 		ptModel = ViewModelProviders.of(this).get(PlacedTagModel.class);
 
 		Intent intent = getIntent();
 		Uri data = intent.getData();
 
-
-
-
-
 		//TODO handle the error when user presses back button after launching activity from outside application
 		//"Fail to connect to camera service"
 
-		if( getIntent().getExtras() != null)
+		if( getIntent().getExtras() != null  & intent.getStringExtra("webImage") == null)
 		{
-			//Log.d("imageURL", " data.getEncodedPath().toString(): " + data.getEncodedPath().toString());
+			Log.d("customSearch", "data.toString: " + intent.getExtras().toString());
+
+			ArActivity.startWithSetup(ArActivity.this, new TagitSetup() {
+			});
+
 			// Figure out what to do based on the intent type
 			if (intent.getType().indexOf("image/") != -1) {
 				Toast.makeText(getApplicationContext(), "Image recognized", Toast.LENGTH_SHORT).show();
-				Toast.makeText(getApplicationContext(), "Only Image Links allowed", Toast.LENGTH_LONG).show();
 
+				//TODO this is redundant, create class and refer to it, Dont repeat yourself
+
+				String[] projection = { MediaStore.Images.Media.DATA };
+				Cursor cursor = managedQuery(
+						MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+						projection, null, null, null);
+				int column_index_data = cursor
+						.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+				cursor.moveToLast();
+
+				String imagePath = cursor.getString(column_index_data);
+				addToUriPaths(imagePath, "type1");
+				Log.d("imageURL", "Uri uri: " + imagePath);
 
 			} else if (intent.getType().equals("text/plain")) {
-				ArActivity.startWithSetup(ArActivity.this, new TagitSetup() {
-				});
 
 				String imageUri = intent.getStringExtra(Intent.EXTRA_TEXT);
 				//String imageUri = (String) intent.getParcelableExtra(Intent.EXTRA_TEXT);
@@ -131,22 +143,21 @@ public class ArActivity extends LifecycleActivity {
 					else {
 						addToUriPaths(textToDisplay, "type2");
 					}
-
 				}
 			}
-
 		}
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d("customSearch", "intent result: " + data.toString());
+		Log.d("customSearch", "intent requestCode: " + Integer.toString(requestCode));
 		if (resultCode == RESULT_OK) {
+
 			if (requestCode == RESULT_LOAD_IMAGE) {
 
 				Uri uri = data.getData();
-
 				String[] filePathColumn = { MediaStore.Images.Media.DATA };
-
 				Cursor cursor = getContentResolver().query(uri,
 						filePathColumn, null, null, null);
 				cursor.moveToFirst();
@@ -159,10 +170,30 @@ public class ArActivity extends LifecycleActivity {
 			}
 			if (requestCode == IMAGE_SEARCH_CODE) {
 
-				Uri uri = data.getData();
+				//TODO currently nothing happens on image search result.  Change this?
+				String webImageUrl = data.getStringExtra("webImage");
 
-				Toast.makeText(getApplicationContext(), "Image search URI: " + uri.toString(), Toast.LENGTH_SHORT).show();
+				Log.d("customSearch", "webImage: " + webImageUrl);
+				addToUriPaths(webImageUrl, "type3");
+				//Toast.makeText(getApplicationContext(), "Image search URI: " + uri.toString(), Toast.LENGTH_SHORT).show();
 			}
+			if (requestCode == REQUEST_IMAGE_CAPTURE) {
+
+				String[] projection = { MediaStore.Images.Media.DATA };
+				Cursor cursor = managedQuery(
+						MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+						projection, null, null, null);
+				int column_index_data = cursor
+						.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+				cursor.moveToLast();
+
+				String imagePath = cursor.getString(column_index_data);
+				addToUriPaths(imagePath, "type1");
+				Log.d("imageURL", "Uri uri: " + imagePath);
+			}
+		}
+		else {
+			Log.d("customSearch", "resultCode: " + Integer.toString(resultCode));
 		}
 	}
 	public void addToUriPaths(String textToAdd, String type){
@@ -187,11 +218,8 @@ public class ArActivity extends LifecycleActivity {
 				ArActivity.class), requestCode);
 	}
 
-
-
 	private void runSetup() {
 		mySetupToUse.run(this);
-
 	}
 
 	@Override
@@ -206,7 +234,6 @@ public class ArActivity extends LifecycleActivity {
 		if (mySetupToUse != null)
 			mySetupToUse.onResume(this);
 		super.onResume();
-
 	}
 
 	@Override
@@ -273,7 +300,6 @@ public class ArActivity extends LifecycleActivity {
 
 	public void showAlertDialog(int tagid)
 	{
-
 		runOnUiThread(new Runnable() {
 			public void run()
 			{
@@ -281,16 +307,21 @@ public class ArActivity extends LifecycleActivity {
 				AlertDialog.Builder builder = new AlertDialog.Builder(ArActivity.this);
 				builder.setItems(items, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
+						MediaPlayer mPlayer;
+						mPlayer = MediaPlayer.create(getBaseContext(), R.raw.roll);
+						mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 						//Toast.makeText(getActivity().getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
 						switch(item) {
 							case 0:
 								ptModel.deleteAllPlacedTags();
 								Toast.makeText(ArActivity.this, "All Tags Deleted", Toast.LENGTH_SHORT).show();
+								mPlayer.start();
 								break;
 							case 1:
 
 								ptModel.deletePlacedTagById(tagid);
 								Toast.makeText(ArActivity.this, "Deleted" + Integer.toString(tagid), Toast.LENGTH_SHORT).show();
+								mPlayer.start();
 
 								break;
 							default:
@@ -299,10 +330,7 @@ public class ArActivity extends LifecycleActivity {
 				});
 				AlertDialog alert = builder.create();
 				alert.show();
-
 			}
 		});
 	}
-
-
 }

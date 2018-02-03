@@ -78,6 +78,7 @@
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain"/>
+                <data android:mimeType="image/*"/>
             </intent-filter>
 
 
@@ -88,7 +89,7 @@
         </activity>
 
         <!-- Custom List is used to easily display lists of any type of object -->
-        <activity android:name="gui.CustomListActivity" >
+        <activity android:name=".SearchActivity" >
         </activity>
 
         <!-- the error handler will be automatically displayed when an error appears -->

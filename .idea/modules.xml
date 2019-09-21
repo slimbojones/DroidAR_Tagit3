@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/DroidAR_Tagit3.iml" filepath="$PROJECT_DIR$/.idea/DroidAR_Tagit3.iml" group="DroidAR_Tagit3" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="DroidAR_Tagit3/app" />
-      <module fileurl="file://$PROJECT_DIR$/droidAR/droidar.iml" filepath="$PROJECT_DIR$/droidAR/droidar.iml" group="DroidAR_Tagit3/droidar" />
+      <module fileurl="file://$PROJECT_DIR$/droidarNew/droidarNew.iml" filepath="$PROJECT_DIR$/droidarNew/droidarNew.iml" group="DroidAR_Tagit3/droidarNew" />
     </modules>
   </component>
 </project>

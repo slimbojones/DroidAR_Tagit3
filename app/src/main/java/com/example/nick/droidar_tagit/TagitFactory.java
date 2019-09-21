@@ -3,13 +3,14 @@ package com.example.nick.droidar_tagit;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.opengl.GLES20;
 import android.widget.TextView;
 
 import javax.microedition.khronos.opengles.GL10;
 
 import geo.GeoObj;
 import gl.Color;
-import gl.CordinateAxis;
+import gl.CoordinateAxis;
 import gl.GLCamera;
 import gl.Renderable;
 import gl.animations.AnimationFaceToCamera;
@@ -560,8 +561,8 @@ public class TagitFactory {
 			}
 
 			@Override
-			public void draw(GL10 gl, Renderable parent) {
-				CordinateAxis.draw(gl);
+			public void draw(GLES20 gl, Renderable parent) {
+				CoordinateAxis.draw(gl);
 			}
 		};
 	}

@@ -1,1 +1,1 @@
-include ':app', ':droidar', ':droidar2'
+include ':app', ':droidarNew'

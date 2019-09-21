@@ -6,8 +6,6 @@ import android.graphics.Typeface;
 import android.opengl.GLES20;
 import android.widget.TextView;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import geo.GeoObj;
 import gl.Color;
 import gl.CoordinateAxis;
@@ -31,7 +29,7 @@ import worldData.World;
 
 /**
  * Use this factory to understand how to create 3D objects with {@link Shape}s
- * and {@link RenderGroup}s. Often it is more efficient to create the objects
+ * and {@link system.Container}s. Often it is more efficient to create the objects
  * you need manually and not combine objects created with this factory. The
  * benefits of algorithmic objects are that they are much more flexible and
  * random {@link Vec}tors can be used to add a unique touch to each object.

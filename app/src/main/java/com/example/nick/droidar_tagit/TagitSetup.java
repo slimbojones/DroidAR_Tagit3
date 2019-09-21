@@ -95,7 +95,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			thisGuiSetup.getTopView().getChildAt(0).setVisibility(View.VISIBLE);
 			thisGuiSetup.getTopView().getChildAt(1).setVisibility(View.VISIBLE);
 			thisGuiSetup.getTopView().getChildAt(2).setVisibility(View.VISIBLE);
-			thisGuiSetup.getTopView().getChildAt(4).setVisibility(View.VISIBLE);
+//TODO			thisGuiSetup.getTopView().getChildAt(4).setVisibility(View.VISIBLE);
 			thisGuiSetup.getTopView().getChildAt(3).setVisibility(View.GONE);
 		} else {
 			thisGuiSetup.getBottomView().getChildAt(0).setVisibility(View.VISIBLE);
@@ -103,7 +103,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			thisGuiSetup.getTopView().getChildAt(0).setVisibility(View.GONE);
 			thisGuiSetup.getTopView().getChildAt(1).setVisibility(View.GONE);
 			thisGuiSetup.getTopView().getChildAt(2).setVisibility(View.GONE);
-			thisGuiSetup.getTopView().getChildAt(4).setVisibility(View.GONE);
+//TODO			thisGuiSetup.getTopView().getChildAt(4).setVisibility(View.GONE);
 			thisGuiSetup.getTopView().getChildAt(3).setVisibility(View.VISIBLE);
 		}
 	}
@@ -185,7 +185,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		thisGuiSetup = guiSetup;
 
 		//CREATE IMAGE PICKER BUTTON
-		guiSetup.addImangeButtonToTopView(R.drawable.ic_insert_photo_black_24px, new Command() {
+		thisGuiSetup/*guiSetup*/.addImangeButtonToTopView(R.drawable.ic_insert_photo_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
@@ -194,19 +194,19 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 				Intent mediaChooser = new Intent(Intent.ACTION_GET_CONTENT);
 				mediaChooser.setType("video/*, image/*");
-				((AppCompatActivity) myTargetActivity).startActivityForResult(mediaChooser, RESULT_LOAD_IMAGE);
+				((AppCompatActivity) getActivity()).startActivityForResult(mediaChooser, RESULT_LOAD_IMAGE);
 
 				return true;
 			}
 		});
 
 		//CREATE TEXT PICKER BUTTON
-		guiSetup.addImangeButtonToTopView(R.drawable.ic_insert_comment_black_24px, new Command() {
+		thisGuiSetup/*guiSetup*/.addImangeButtonToTopView(R.drawable.ic_insert_comment_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
 
-				View ibView = guiSetup.getRightView().getChildAt(0);
+				View ibView = thisGuiSetup/*guiSetup*/.getRightView().getChildAt(0);
 				if (ibView instanceof EditText) {
 
 					ibView.setVisibility(View.VISIBLE);
@@ -220,18 +220,17 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		});
 
 		//CREATE WEB PICKER BUTTON
-		guiSetup.addImangeButtonToTopView(R.drawable.ic_public_black_24px, new Command() {
+		thisGuiSetup/*guiSetup*/.addImangeButtonToTopView(R.drawable.ic_public_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
 
-				Intent i = new Intent(myTargetActivity.getApplicationContext(),
-						SearchActivity.class);
+				Intent i = new Intent(getActivity().getApplicationContext(), SearchActivity.class);
 
 				//i.putExtra("result", imageResult);
 				// TODO, wanted to test this
 
-				myTargetActivity.startActivityForResult(i, IMAGE_SEARCH_CODE);
+				getActivity().startActivityForResult(i, IMAGE_SEARCH_CODE);
 
 				return true;
 			}
@@ -276,14 +275,14 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		});
 */
 		//CREATE CAMERA BUTTON
-		guiSetup.addImangeButtonToTopView(R.drawable.ic_photo_camera_black_24px, new Command() {
+		thisGuiSetup/*guiSetup*/.addImangeButtonToTopView(R.drawable.ic_photo_camera_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
 
 				Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-				if (takePictureIntent.resolveActivity(myTargetActivity.getPackageManager()) != null) {
-					myTargetActivity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+				if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+					getActivity().startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
 				}
 
 				return true;
@@ -291,12 +290,12 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		});
 
 		//CREATE INVISIBLE EDITTEXT
-		guiSetup.addSearchbarToView(guiSetup.getRightView(), new Command() {
+		thisGuiSetup/*guiSetup*/.addSearchbarToView(thisGuiSetup/*guiSetup*/.getRightView(), new Command() {
 
 			public boolean execute() {
 				TextView v = new TextView(getActivity().getBaseContext());
 				v.setBackgroundColor(Color.DKGRAY);
-				View ibView = guiSetup.getRightView().getChildAt(0);
+				View ibView = thisGuiSetup/*guiSetup*/.getRightView().getChildAt(0);
 				if (ibView instanceof EditText) {
 					if (((EditText) ibView).getText().toString().matches("")) {
 						textToDisplay = "Tagit";
@@ -308,7 +307,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 				v.setShadowLayer(0.01f, -2, 2, Color.BLACK);
 				myBitmap = IO.loadBitmapFromView(v);
 
-				ArActivity myActivity = (ArActivity) myTargetActivity;
+				ArActivity myActivity = (ArActivity) getActivity();
 
 				//TODO verify that link works and url is valid image file
 
@@ -322,7 +321,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			}
 		}, textToDisplay);
 
-		View myEditText = guiSetup.getRightView().getChildAt(0);
+		View myEditText = thisGuiSetup/*guiSetup*/.getRightView().getChildAt(0);
 		if (myEditText instanceof EditText) {
 
 			((EditText) myEditText).setWidth(0);
@@ -332,7 +331,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		}
 
 		//CREATE CHECK BUTTON TO PLACE OBJECT
-		guiSetup.addImangeButtonToBottomView(R.drawable.ic_check_circle_black_24px, new Command() {
+		thisGuiSetup/*guiSetup*/.addImangeButtonToBottomView(R.drawable.ic_check_circle_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
@@ -379,7 +378,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		});
 
 		//CREATE CANCEL BUTTON TO EXIT PLACEMENT
-		guiSetup.addImangeButtonToBottomView(R.drawable.ic_cancel_black_24px, new Command() {
+		thisGuiSetup/*guiSetup*/.addImangeButtonToBottomView(R.drawable.ic_cancel_black_24px, new Command() {
 
 			@Override
 			public boolean execute() {
@@ -390,11 +389,11 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			}
 		});
 
-		guiSetup.setTopViewCentered();
-		guiSetup.setBottomViewCentered();
+		thisGuiSetup/*guiSetup*/.setTopViewCentered();
+		thisGuiSetup/*guiSetup*/.setBottomViewCentered();
 
-		guiSetup.getBottomView().getChildAt(0).setVisibility(View.GONE);
-		guiSetup.getBottomView().getChildAt(1).setVisibility(View.GONE);
+		thisGuiSetup/*guiSetup*/.getBottomView().getChildAt(0).setVisibility(View.GONE);
+		thisGuiSetup/*guiSetup*/.getBottomView().getChildAt(1).setVisibility(View.GONE);
 
 		//android.view.ViewGroup.LayoutParams params2 = guiSetup.getBottomView().getChildAt(0).getLayoutParams();
 		//params2.width = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -403,41 +402,41 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		//TODO need a better way to set button size which is responsive to screen size
 		int buttonPadding = 0;
 
-		guiSetup.getBottomView().getChildAt(0).setPadding(100, buttonPadding, 100, buttonPadding);
-		guiSetup.getBottomView().getChildAt(1).setPadding(100, buttonPadding, 100, buttonPadding);
-		guiSetup.getTopView().getChildAt(0).setPadding(100, buttonPadding, 100, buttonPadding);
-		guiSetup.getTopView().getChildAt(1).setPadding(100, buttonPadding, 100, buttonPadding);
-		guiSetup.getTopView().getChildAt(2).setPadding(100, buttonPadding, 100, buttonPadding);
-		guiSetup.getTopView().getChildAt(4).setPadding(100, buttonPadding, 100, buttonPadding);
+		thisGuiSetup/*guiSetup*/.getBottomView().getChildAt(0).setPadding(100, buttonPadding, 100, buttonPadding);
+		thisGuiSetup/*guiSetup*/.getBottomView().getChildAt(1).setPadding(100, buttonPadding, 100, buttonPadding);
+		thisGuiSetup/*guiSetup*/.getTopView().getChildAt(0).setPadding(100, buttonPadding, 100, buttonPadding);
+		thisGuiSetup/*guiSetup*/.getTopView().getChildAt(1).setPadding(100, buttonPadding, 100, buttonPadding);
+		thisGuiSetup/*guiSetup*/.getTopView().getChildAt(2).setPadding(100, buttonPadding, 100, buttonPadding);
+//TODO		thisGuiSetup/*guiSetup*/.getTopView().getChildAt(4).setPadding(100, buttonPadding, 100, buttonPadding);
 
-		guiSetup.getLeftOuter().removeAllViews();
+		thisGuiSetup/*guiSetup*/.getLeftOuter().removeAllViews();
 		RecyclerView DynamicListView = new RecyclerView(getActivity().getBaseContext());
-		guiSetup.getLeftOuter().addView(DynamicListView);
+		thisGuiSetup/*guiSetup*/.getLeftOuter().addView(DynamicListView);
 
-		ViewGroup.LayoutParams params = guiSetup.getLeftOuter().getLayoutParams();
+		ViewGroup.LayoutParams params = thisGuiSetup/*guiSetup*/.getLeftOuter().getLayoutParams();
 		//TODO change width to something dynamic and scalable
 		params.width = 160;
-		guiSetup.getLeftOuter().setLayoutParams(params);
-		guiSetup.getLeftOuter().requestLayout();
+		thisGuiSetup/*guiSetup*/.getLeftOuter().setLayoutParams(params);
+		thisGuiSetup/*guiSetup*/.getLeftOuter().requestLayout();
 
 		View.OnLongClickListener myLongListener = this;
 		View.OnClickListener myListener = this;
 
-		mModel = ViewModelProviders.of((ArActivity) myTargetActivity).get(NameViewModel.class);
+		mModel = ViewModelProviders.of((ArActivity) getActivity()).get(NameViewModel.class);
 
 		recyclerViewAdapter = new RecyclerViewAdapter(new ArrayList<Tagpost>(), myLongListener, myListener, getActivity().getBaseContext());
-		DynamicListView.setLayoutManager(new LinearLayoutManager((ArActivity) myTargetActivity));
+		DynamicListView.setLayoutManager(new LinearLayoutManager((ArActivity) getActivity()));
 		DynamicListView.setAdapter(recyclerViewAdapter);
 
-		mModel.getUriPathList().observe((ArActivity) myTargetActivity, new Observer<List<Tagpost>>() {
+		mModel.getUriPathList().observe((ArActivity) getActivity(), new Observer<List<Tagpost>>() {
 			@Override
 			public void onChanged(@Nullable List<Tagpost> thisUriPathList) {
 				recyclerViewAdapter.addItems(thisUriPathList);
 			}
 		});
 
-		ptModel = ViewModelProviders.of((ArActivity) myTargetActivity).get(PlacedTagModel.class);
-		ptModel.getPlacedTagList().observe((ArActivity) myTargetActivity, new Observer<List<PlacedTag>>() {
+		ptModel = ViewModelProviders.of((ArActivity) getActivity()).get(PlacedTagModel.class);
+		ptModel.getPlacedTagList().observe((ArActivity) getActivity(), new Observer<List<PlacedTag>>() {
 			@Override
 			public void onChanged(@Nullable List<PlacedTag> getThosePlacedTags) {
 				//TODO load only the new placedtags somehow?
@@ -472,7 +471,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 	public void placeObjectFromSelector(Bitmap selectedBitmap) {
 		arrow = TagitFactory.getInstance().newTexturedSquare(selectedBitmap.toString(), selectedBitmap, 5);
-		arrow.setOnClickCommand(new CommandShowToast(myTargetActivity,"Item Found +1"));
+		arrow.setOnClickCommand(new CommandShowToast(getActivity(),"Item Found +1"));
 		arrow.addAnimation(new AnimationFaceToCamera(camera));
 
 		placerContainer.setComp(viewPosCalcer);
@@ -486,7 +485,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 	@Override
 	public boolean onLongClick(View view) {
 		final CharSequence[] items = {"Delete ALL From Toolbelt", "Delete From Toolbelt", "Nevermind"};
-		AlertDialog.Builder builder = new AlertDialog.Builder((ArActivity) myTargetActivity);
+		AlertDialog.Builder builder = new AlertDialog.Builder((ArActivity) getActivity());
 		builder.setItems(items, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int item) {
 				//Toast.makeText(getActivity().getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
@@ -581,7 +580,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 			tempBitmap[0] = (IO.loadBitmapFromFile(bitmapString/*, 2*/));
 		} else if (typeString.equals("type2")) {
-			TextView v = new TextView(myTargetActivity);
+			TextView v = new TextView(getActivity());
 			v.setBackgroundColor(Color.DKGRAY);
 			v.setTypeface(null, Typeface.BOLD);
 			v.setShadowLayer(0.01f, -2, 2, Color.BLACK);
@@ -625,7 +624,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			@Override
 			public boolean execute() {
 				//ptModel.deletePlacedTag(placedTag);
-				ArActivity myActivity = (ArActivity) myTargetActivity;
+				ArActivity myActivity = (ArActivity) getActivity();
 				myActivity.showAlertDialog(placedTag.getid());
 				return true;
 			}

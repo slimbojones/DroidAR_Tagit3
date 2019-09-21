@@ -2,16 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://C:\Users\nick\artoolkit5\AndroidStudioProjects\DroidAR_Tagit3\.idea\DroidAR_Tagit.iml" filepath="C:\Users\nick\artoolkit5\AndroidStudioProjects\DroidAR_Tagit3\.idea\DroidAR_Tagit.iml" />
-      <module fileurl="file://C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit\DroidAR_Tagit.iml" filepath="C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit\DroidAR_Tagit.iml" />
-      <module fileurl="file://$PROJECT_DIR$/DroidAR_Tagit3.iml" filepath="$PROJECT_DIR$/DroidAR_Tagit3.iml" />
-      <module fileurl="file://C:\Users\nick\artoolkit5\AndroidStudioProjects\DroidAR_Tagit3\.idea\DroidAR_Tagit3.iml" filepath="C:\Users\nick\artoolkit5\AndroidStudioProjects\DroidAR_Tagit3\.idea\DroidAR_Tagit3.iml" />
-      <module fileurl="file://C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit3\DroidAR_Tagit3.iml" filepath="C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit3\DroidAR_Tagit3.iml" />
-      <module fileurl="file://C:\Users\nick\artoolkit5\AndroidStudioProjects\DroidAR_Tagit3\app\DroidAR_Tagit3-app.iml" filepath="C:\Users\nick\artoolkit5\AndroidStudioProjects\DroidAR_Tagit3\app\DroidAR_Tagit3-app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit3\app\app.iml" filepath="C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit3\app\app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/droidAR/droidAR.iml" filepath="$PROJECT_DIR$/droidAR/droidAR.iml" />
-      <module fileurl="file://C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit3\droidAR\droidAR.iml" filepath="C:\Users\slimbojones\AndroidStudioProjects\DroidAR_Tagit3\droidAR\droidAR.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/DroidAR_Tagit3.iml" filepath="$PROJECT_DIR$/.idea/DroidAR_Tagit3.iml" group="DroidAR_Tagit3" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="DroidAR_Tagit3/app" />
+      <module fileurl="file://$PROJECT_DIR$/droidAR/droidar.iml" filepath="$PROJECT_DIR$/droidAR/droidar.iml" group="DroidAR_Tagit3/droidar" />
     </modules>
   </component>
 </project>

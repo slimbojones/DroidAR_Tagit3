@@ -1,2 +1,1 @@
-include ':app'
-include ':droidAR'
+include ':app', ':droidar', ':droidar2'

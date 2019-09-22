@@ -3,7 +3,7 @@ package com.example.nick.droidar_tagit;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -35,6 +35,8 @@ public class SearchActivity extends AppCompatActivity {
 	Button btSearch;
 	TextView tvPage;
 
+	static final String LOG_TAG = SearchActivity.class.getSimpleName();
+
 	ArrayList<ImageResult> imageResults = new ArrayList<ImageResult>();
 	ImageResultArrayAdapter imageAdapter;
 
@@ -57,7 +59,7 @@ public class SearchActivity extends AppCompatActivity {
 
 				//TODO get full image url instead of thumbnail?
 				i.putExtra("webImage", imageResult.getFullUrl());
-				Log.d("customSearch", "onclick full url: " + imageResult.getFullUrl());
+				Log.d(LOG_TAG, "onclick full url: " + imageResult.getFullUrl());
 
 				setResult(ArActivity.RESULT_OK, i);
 				finish();
@@ -115,32 +117,33 @@ public class SearchActivity extends AppCompatActivity {
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.setRequestMethod("GET");
 				conn.setRequestProperty("Accept", "application/json");
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						(conn.getInputStream())));
+				StringBuilder builder;
+				try (BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())))) {
 
-				StringBuilder builder = new StringBuilder();
+					builder = new StringBuilder();
 
-				String output;
-				Log.d("customSearch", "url.toString()" + url.toString());
-				while ((output = br.readLine()) != null) {
-					builder.append(output + "\n");
+					String output;
+					Log.d(LOG_TAG, "url.toString()" + url.toString());
+					while ((output = br.readLine()) != null) {
+						builder.append(output).append("\n");
+					}
 				}
 
 				try {
 					JSONObject outerJSON = new JSONObject(builder.toString());
-					Log.d("customSearch", "outerJSON: " + outerJSON.toString());
+					Log.d(LOG_TAG, "outerJSON: " + outerJSON.toString());
 					imageJsonResults = outerJSON.getJSONArray("items");
 
-					Log.d("customSearch", "itemArray: " + imageJsonResults.toString());
+					Log.d(LOG_TAG, "itemArray: " + imageJsonResults.toString());
 
 					imageResults.clear();
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				Log.d("customSearch", "builder.toString()" + builder.toString());
+				Log.d(LOG_TAG, "builder.toString()" + builder);
 				try {
 					JSONArray jsonArray = new JSONArray(builder.toString());
-					Log.d("customSearch", "jsonArray.toString" + jsonArray.toString());
+					Log.d(LOG_TAG, "jsonArray.toString" + jsonArray.toString());
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}

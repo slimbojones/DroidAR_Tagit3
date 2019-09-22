@@ -24,8 +24,7 @@ public class MainActivity extends AppCompatActivity {
 		b.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				ArActivity.startWithSetup(MainActivity.this, new TagitSetup() {
-				});
+				ArActivity.startWithSetup(MainActivity.this, new TagitSetup() { });
 			}
 		});
 		setContentView(b);

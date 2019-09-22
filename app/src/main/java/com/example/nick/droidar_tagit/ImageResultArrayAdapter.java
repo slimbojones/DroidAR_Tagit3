@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -25,7 +27,8 @@ public class ImageResultArrayAdapter extends ArrayAdapter<ImageResult> {
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	@NonNull
+	public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 		ImageResult imageInfo = this.getItem(position);
 		/*
 		 * TODO: for tony read up on SmartImageView

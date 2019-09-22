@@ -1,6 +1,7 @@
 package com.example.nick.droidar_tagit;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,7 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
+import util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -111,8 +112,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 	@Override
 	public void _a_initFieldsIfNecessary() {
 		// allow the user to send error reports to the developer:
-		ErrorHandler.enableEmailReports("droidar.rwth@gmail.com",
-				"Error in DroidAR App");
+		ErrorHandler.enableEmailReports("droidar.rwth@gmail.com", "Error in DroidAR App");
 		placeObjectWrapper = new Wrapper();
 	}
 
@@ -125,8 +125,7 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 	}
 
 	@Override
-	public void _c_addActionsToEvents(EventManager eventManager,
-									  CustomGLSurfaceView arView, SystemUpdater updater) {
+	public void _c_addActionsToEvents(EventManager eventManager, CustomGLSurfaceView arView, SystemUpdater updater) {
 
 		Action rot1 = new ActionRotateCameraBuffered(camera);
 
@@ -212,7 +211,8 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 					ibView.setVisibility(View.VISIBLE);
 
 					ibView.requestFocusFromTouch();
-					InputMethodManager lManager = (InputMethodManager) getActivity().getSystemService(getActivity().getBaseContext().INPUT_METHOD_SERVICE);
+					getActivity().getBaseContext();
+					InputMethodManager lManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 					lManager.showSoftInput((ibView), 0);
 				}
 				return true;
@@ -279,7 +279,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 			@Override
 			public boolean execute() {
-
 				Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 				if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
 					getActivity().startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -382,7 +381,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 			@Override
 			public boolean execute() {
-
 				placerContainer.remove(arrow);
 				toggleViews();
 				return true;
@@ -577,7 +575,6 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		final Bitmap[] tempBitmap = new Bitmap[1];
 
 		if (typeString.equals("type1")) {
-
 			tempBitmap[0] = (IO.loadBitmapFromFile(bitmapString/*, 2*/));
 		} else if (typeString.equals("type2")) {
 			TextView v = new TextView(getActivity());

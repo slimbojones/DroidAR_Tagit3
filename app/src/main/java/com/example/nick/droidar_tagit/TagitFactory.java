@@ -41,7 +41,7 @@ import worldData.World;
  */
 public class TagitFactory {
 
-	private static final String LOG_TAG = "GLFactory";
+	private static final String LOG_TAG = TagitFactory.class.getSimpleName();
 	private static final float HEIGHT_TO_SIDE_FACTOR = (float) (2f / Math.sqrt(3f));
 	private static TagitFactory myInstance = new TagitFactory();
 
@@ -420,8 +420,7 @@ public class TagitFactory {
 	public Shape newDirectedPath(Vec lineEndPos, Color c) {
 
 		Shape s = new Shape(c);
-		Vec orth = Vec.getOrthogonalHorizontal(lineEndPos).normalize()
-					  .mult(0.9f);
+		Vec orth = Vec.getOrthogonalHorizontal(lineEndPos).normalize().mult(0.9f);
 		Vec orthClone = orth.getNegativeClone();
 		float down = 0.5f;
 		Vec l = lineEndPos.copy().setLength(0.3f);

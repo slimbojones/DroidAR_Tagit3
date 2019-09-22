@@ -38,8 +38,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 	@NonNull
 	@Override
 	public RecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-		return new RecyclerViewHolder(LayoutInflater.from(parent.getContext())
-													.inflate(R.layout.mylist, parent, false));
+		return new RecyclerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.mylist, parent, false));
 	}
 
 	@Override

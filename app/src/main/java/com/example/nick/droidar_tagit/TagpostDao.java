@@ -23,10 +23,10 @@ public interface TagpostDao {
 	Tagpost getTagpostbyId(String id);
 
 	@Insert(onConflict = REPLACE)
-	void addTagpost(com.example.nick.droidar_tagit.Tagpost tagpost);
+	void addTagpost(Tagpost tagpost);
 
 	@Delete
-	void deleteTagpost(com.example.nick.droidar_tagit.Tagpost tagpost);
+	void deleteTagpost(Tagpost tagpost);
 
 	@Query("DELETE FROM Tagpost")
 	void deleteAllTagposts();

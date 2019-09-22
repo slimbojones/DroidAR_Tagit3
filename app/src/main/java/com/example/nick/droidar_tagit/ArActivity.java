@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.loader.content.CursorLoader;
 
 import com.google.firebase.storage.StorageReference;
 
@@ -31,7 +32,7 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 
 	static final int REQUEST_IMAGE_CAPTURE = 3;
 	static final int IMAGE_SEARCH_CODE = 5;
-	private static final String LOG_TAG = "ArActivity";
+	private static final String LOG_TAG = ArActivity.class.getSimpleName();
 	private static Setup staticSetupHolder;
 	private static int RESULT_LOAD_IMAGE = 1;
 	View DynamicListView;
@@ -45,8 +46,7 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 		currentActivity.startActivity(new Intent(currentActivity, ArActivity.class));
 	}
 
-	public static void startWithSetupForResult(AppCompatActivity currentActivity,
-											   Setup setupToUse, int requestCode) {
+	public static void startWithSetupForResult(AppCompatActivity currentActivity, Setup setupToUse, int requestCode) {
 		ArActivity.staticSetupHolder = setupToUse;
 		currentActivity.startActivityForResult(new Intent(currentActivity, ArActivity.class), requestCode);
 	}
@@ -82,8 +82,7 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 		if (getIntent().getExtras() != null & intent.getStringExtra("webImage") == null) {
 			Log.d("customSearch", "data.toString: " + intent.getExtras().toString());
 
-			ArActivity.startWithSetup(ArActivity.this, new TagitSetup() {
-			});
+			ArActivity.startWithSetup(ArActivity.this, new TagitSetup() { });
 
 			// Figure out what to do based on the intent type
 			if (intent.getType().contains("image/")) {
@@ -131,11 +130,9 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 		if (resultCode == RESULT_OK) {
 
 			if (requestCode == RESULT_LOAD_IMAGE) {
-
 				Uri uri = data.getData();
 				String[] filePathColumn = {MediaStore.Images.Media.DATA};
-				Cursor cursor = getContentResolver().query(uri,
-						filePathColumn, null, null, null);
+				Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
 				cursor.moveToFirst();
 
 				int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
@@ -146,7 +143,7 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 			}
 			if (requestCode == IMAGE_SEARCH_CODE) {
 
-				//TODO currently nothing happens on image search result.  Change this?
+				//TODO currently nothing happens on image search result. Change this?
 				String webImageUrl = data.getStringExtra("webImage");
 
 				Log.d("customSearch", "webImage: " + webImageUrl);
@@ -159,8 +156,7 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 				Cursor cursor = managedQuery(
 						MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
 						projection, null, null, null);
-				int column_index_data = cursor
-						.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+				int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 				cursor.moveToLast();
 
 				String imagePath = cursor.getString(column_index_data);
@@ -231,8 +227,7 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		Log.d("ARkeydown", "keycode: " + keyCode);
 		Log.d("ARkeydown", "keyevent: " + event.toString());
-		if ((mySetupToUse != null)
-				&& (mySetupToUse.onKeyDown(this, keyCode, event)))
+		if ((mySetupToUse != null) && (mySetupToUse.onKeyDown(this, keyCode, event)))
 			return true;
 		return super.onKeyDown(keyCode, event);
 	}

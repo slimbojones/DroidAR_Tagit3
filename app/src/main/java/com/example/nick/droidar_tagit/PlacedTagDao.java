@@ -23,10 +23,10 @@ public interface PlacedTagDao {
 	PlacedTag getPlacedTagbyId(int id);
 
 	@Insert(onConflict = REPLACE)
-	void addPlacedTag(com.example.nick.droidar_tagit.PlacedTag placedTag);
+	void addPlacedTag(PlacedTag placedTag);
 
 	@Delete
-	void deletePlacedTag(com.example.nick.droidar_tagit.PlacedTag placedTag);
+	void deletePlacedTag(PlacedTag placedTag);
 
 	@Query("DELETE FROM PlacedTag")
 	void deleteAllPlacedTags();

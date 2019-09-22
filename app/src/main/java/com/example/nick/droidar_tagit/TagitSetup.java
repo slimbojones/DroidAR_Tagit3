@@ -67,6 +67,7 @@ import worldData.World;
 
 public class TagitSetup extends Setup implements View.OnLongClickListener, View.OnClickListener {
 
+	static final String LOG_TAG = TagitSetup.class.getSimpleName();
 	static final int REQUEST_IMAGE_CAPTURE = 3;
 	private static int RESULT_LOAD_IMAGE = 1;
 	private static int IMAGE_SEARCH_CODE = 5;
@@ -149,13 +150,13 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 						targetVec = new Vec(targetVec.x + ewValue, targetVec.y + nsValue, targetVec.z);
 						m.myTargetPos = targetVec;
-						Log.d("m.myTargetPos", "m.myTargetPos: " + m.myTargetPos.toString());
+						Log.d(LOG_TAG, "m.myTargetPos: " + m.myTargetPos.toString());
 
 						camera.showDebugInformation();
-						Log.d("myCamera", "camera pos: " + camera.getPosition().toString());
-						Log.d("myCamera", "camera rotMatrix: " + camera.getRotationMatrix().length);
-						Log.d("myCamera", "camera getNewPosition: " + camera.getMyNewPosition().toString());
-						Log.d("myCamera", "camera getCameraAnglesInDegree: " + camera.getCameraAnglesInDegree()[0]);
+						Log.d(LOG_TAG, "camera pos: " + camera.getPosition().toString());
+						Log.d(LOG_TAG, "camera rotMatrix: " + camera.getRotationMatrix().length);
+						Log.d(LOG_TAG, "camera getNewPosition: " + camera.getMyNewPosition().toString());
+						Log.d(LOG_TAG, "camera getCameraAnglesInDegree: " + camera.getCameraAnglesInDegree()[0]);
 					}
 				}
 			}
@@ -349,12 +350,12 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 				String bitmapString = currentTagpost.getitemString();
 				String typeString = currentTagpost.gettagType();
 
-				Log.d("PlacedTag", "on check position: " + camera.getPosition().toString());
-				Log.d("PlacedTag", "on check rotation: " + camera.getRotation().toString());
-				Log.d("PlacedTag", "on check GPSpostionvec: " + camera.getGPSPositionVec().toString());
-				Log.d("PlacedTag", "on check new camera offset: " + camera.getNewCameraOffset().toString());
-				Log.d("PlacedTag", "on check mynewposition: " + camera.getMyNewPosition().toString());
-				Log.d("PlacedTag", "arrow getPosition: " + arrow.getPosition().toString());
+				Log.d(LOG_TAG + " PlacedTag", "on check position: " + camera.getPosition().toString());
+				Log.d(LOG_TAG + " PlacedTag", "on check rotation: " + camera.getRotation().toString());
+				Log.d(LOG_TAG + " PlacedTag", "on check GPSpostionvec: " + camera.getGPSPositionVec().toString());
+				Log.d(LOG_TAG + " PlacedTag", "on check new camera offset: " + camera.getNewCameraOffset().toString());
+				Log.d(LOG_TAG + " PlacedTag", "on check mynewposition: " + camera.getMyNewPosition().toString());
+				Log.d(LOG_TAG + " PlacedTag", "arrow getPosition: " + arrow.getPosition().toString());
 
 				GeoObj newGeo = new GeoObj();
 				newGeo.setVirtualPosition(arrow.getPosition());
@@ -408,8 +409,8 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 //TODO		thisGuiSetup/*guiSetup*/.getTopView().getChildAt(4).setPadding(100, buttonPadding, 100, buttonPadding);
 
 		thisGuiSetup/*guiSetup*/.getLeftOuter().removeAllViews();
-		RecyclerView DynamicListView = new RecyclerView(getActivity().getBaseContext());
-		thisGuiSetup/*guiSetup*/.getLeftOuter().addView(DynamicListView);
+		RecyclerView recyclerDynamicView = new RecyclerView(getActivity().getBaseContext());
+		thisGuiSetup/*guiSetup*/.getLeftOuter().addView(recyclerDynamicView);
 
 		ViewGroup.LayoutParams params = thisGuiSetup/*guiSetup*/.getLeftOuter().getLayoutParams();
 		//TODO change width to something dynamic and scalable
@@ -423,8 +424,8 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		mModel = ViewModelProviders.of((ArActivity) getActivity()).get(NameViewModel.class);
 
 		recyclerViewAdapter = new RecyclerViewAdapter(new ArrayList<Tagpost>(), myLongListener, myListener, getActivity().getBaseContext());
-		DynamicListView.setLayoutManager(new LinearLayoutManager((ArActivity) getActivity()));
-		DynamicListView.setAdapter(recyclerViewAdapter);
+		recyclerDynamicView.setLayoutManager(new LinearLayoutManager((ArActivity) getActivity()));
+		recyclerDynamicView.setAdapter(recyclerViewAdapter);
 
 		mModel.getUriPathList().observe((ArActivity) getActivity(), new Observer<List<Tagpost>>() {
 			@Override
@@ -517,21 +518,23 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 
 		try {
 			list2 = ptModel.getPlacedTagList();
-			Log.d("PlacedTag", "first in list" + list2.toString());
-			Log.d("loadPW", "renderedArraybefore: " + renderedArray.toString());
 
-			int listSize = list2.getValue().size();
-			if (list2 != null && listSize > 0) {
-				for (int j = 0; j < listSize; j++) {
+			Log.d(LOG_TAG+" loadFromPublicWorld", "renderedArraybefore: " + renderedArray.toString());
 
-					PlacedTag thisPlacedTag = list2.getValue().get(j);
+//			int listSize = list2.getValue().size();
+//			if (listSize > 0) {
+			if (list2.getValue() != null) {
+//				for (int j = 0; j < listSize; j++) {
+				for (PlacedTag thisPlacedTag : list2.getValue()) {
+//					PlacedTag thisPlacedTag = list2.getValue().get(j);
 					int tagId = thisPlacedTag.getid();
 					//worldTagIds is a list of everything that SHOULD be rendered
 					worldTagIds.add((long) tagId);
+					Log.d(LOG_TAG, "first PlacedTag in list " + thisPlacedTag.toString());
 
 					//Log.d("loadPW", "placedGeoObj: " + placedGeoObj.toString());
 					if (renderedArray.containsKey((long) tagId)) {
-						Log.d("loadPW", "geoObj already exists: " + tagId);
+						Log.d(LOG_TAG+ " loadFromPublicWorld", "geoObj already exists: " + tagId);
 						//already rendered, skip and try the next one
 					} else {
 						spawnObj(thisPlacedTag);
@@ -544,22 +547,22 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 			renderedArrayCopy = new HashMap<Long, GeoObj>(renderedArray);
 			//the following is a list of everything that is currently rendered that needs to be removed
 			renderedArrayCopy.keySet().removeAll(worldTagIds);
-			Log.d("loadPW", "worldTagids: " + worldTagIds.toString());
-			Log.d("loadPW", "renderedArrayCopy: " + renderedArrayCopy.toString());
+			Log.d(LOG_TAG + " loadFromPublicWorld", "worldTagids: " + worldTagIds.toString());
+			Log.d(LOG_TAG + " loadFromPublicWorld", "renderedArrayCopy: " + renderedArrayCopy.toString());
 
 			for (Map.Entry<Long, GeoObj> entry : renderedArrayCopy.entrySet()) {
 				Long key = entry.getKey();
 				GeoObj value = entry.getValue();
-				Log.d("loadPW", "geoobj from renderedArray: " + renderedArray.get(key).toString());
+				Log.d(LOG_TAG + " loadFromPublicWorld", "geoobj from renderedArray: " + renderedArray.get(key).toString());
 				renderedArray.remove(key);
 				world.remove(value);
-				Log.d("loadPW", "removed item: " + key);
+				Log.d(LOG_TAG + " loadFromPublicWorld", "removed item: " + key);
 			}
-			Log.d("loadPW", "world efficientList: " + world.getAllItems().toString());
-			Log.d("loadPW", "renderedArrayafter: " + renderedArray.toString());
+			Log.d(LOG_TAG + " loadFromPublicWorld", "world efficientList: " + world.getAllItems().toString());
+			Log.d(LOG_TAG + " loadFromPublicWorld", "renderedArrayafter: " + renderedArray.toString());
 			Toast.makeText(getActivity().getApplicationContext(), placedCount + "item(s) spawned", Toast.LENGTH_SHORT).show();
 		} catch (Exception e) {
-			Log.d("PlacedTag", "tagitsetup 417" + e.toString());
+			Log.d(LOG_TAG + " loadFromPublicWorld", e.toString());
 		}
 	}
 
@@ -609,9 +612,9 @@ public class TagitSetup extends Setup implements View.OnLongClickListener, View.
 		GeoObj newGeo2 = new GeoObj(latString, longString, altString, mesh, true);
 
 		renderedArray.put(ptId, newGeo2);
-		Log.d("loadPW", "spawnObj mesh: " + mesh.toString());
-		Log.d("loadPW", "added to renderedArray2: " + ptId);
-		Log.d("loadPW", "spawnObj renderedArray: " + renderedArray.toString());
+		Log.d(LOG_TAG + " loadPW", "spawnObj mesh: " + mesh.toString());
+		Log.d(LOG_TAG + " loadPW", "added to renderedArray2: " + ptId);
+		Log.d(LOG_TAG + " loadPW", "spawnObj renderedArray: " + renderedArray.toString());
 
 		//mesh.setPlacedTagId(placedTag.getid());
 

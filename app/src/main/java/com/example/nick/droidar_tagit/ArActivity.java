@@ -91,7 +91,7 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 				//TODO this is redundant, create class and refer to it, Dont repeat yourself
 
 				String[] projection = {MediaStore.Images.Media.DATA};
-				Cursor cursor = managedQuery(
+				Cursor cursor = getContentResolver().query/*managedQuery*/(
 						MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
 						projection, null, null, null);
 				int column_index_data = cursor
@@ -132,12 +132,14 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 			if (requestCode == RESULT_LOAD_IMAGE) {
 				Uri uri = data.getData();
 				String[] filePathColumn = {MediaStore.Images.Media.DATA};
-				Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
-				cursor.moveToFirst();
+				String picturePath;
+				try (Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null)) {
+					cursor.moveToFirst();
 
-				int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-				String picturePath = cursor.getString(columnIndex);
-				cursor.close();
+					int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+					picturePath = cursor.getString(columnIndex);
+					//cursor.close();
+				}
 
 				addToUriPaths(picturePath, "type1");
 			}
@@ -153,13 +155,15 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 			if (requestCode == REQUEST_IMAGE_CAPTURE) {
 
 				String[] projection = {MediaStore.Images.Media.DATA};
-				Cursor cursor = managedQuery(
+				String imagePath;
+				try (Cursor cursor = getContentResolver().query/*managedQuery*/(
 						MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-						projection, null, null, null);
-				int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-				cursor.moveToLast();
+						projection, null, null, null)) {
+					int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+					cursor.moveToLast();
 
-				String imagePath = cursor.getString(column_index_data);
+					imagePath = cursor.getString(column_index_data);
+				}
 				addToUriPaths(imagePath, "type1");
 				Log.d("imageURL", "Uri uri: " + imagePath);
 			}
@@ -184,42 +188,42 @@ public class ArActivity extends AppCompatActivity/*LifecycleActivity*/ {
 	@Override
 	protected void onRestart() {
 		if (mySetupToUse != null)
-			mySetupToUse.onRestart(this);
+			mySetupToUse.onRestart(/*this*/);
 		super.onRestart();
 	}
 
 	@Override
 	protected void onResume() {
 		if (mySetupToUse != null)
-			mySetupToUse.onResume(this);
+			mySetupToUse.onResume(/*this*/);
 		super.onResume();
 	}
 
 	@Override
 	protected void onStart() {
 		if (mySetupToUse != null)
-			mySetupToUse.onStart(this);
+			mySetupToUse.onStart(/*this*/);
 		super.onStart();
 	}
 
 	@Override
 	protected void onStop() {
 		if (mySetupToUse != null)
-			mySetupToUse.onStop(this);
+			mySetupToUse.onStop(/*this*/);
 		super.onStop();
 	}
 
 	@Override
 	protected void onDestroy() {
 		if (mySetupToUse != null)
-			mySetupToUse.onDestroy(this);
+			mySetupToUse.onDestroy(/*this*/);
 		super.onDestroy();
 	}
 
 	@Override
 	protected void onPause() {
 		if (mySetupToUse != null)
-			mySetupToUse.onPause(this);
+			mySetupToUse.onPause(/*this*/);
 		super.onPause();
 	}
 

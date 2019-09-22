@@ -19,7 +19,7 @@ import java.util.List;
 
 public class PlacedTagModel extends AndroidViewModel {
 
-	private String TAG = PlacedTagModel.class.getSimpleName();
+	private String LOG_TAG = PlacedTagModel.class.getSimpleName();
 	private AppDatabase appDatabase;
 
 	// Create a LiveData with a String
@@ -32,12 +32,12 @@ public class PlacedTagModel extends AndroidViewModel {
 
 		//appDatabase.placedTagModel().deleteAllPlacedTags();
 
-		Log.d("PlacedTag", "right before");
+		Log.d(LOG_TAG, "right before");
 		placedTagList = appDatabase.placedTagModel().getPlacedTags();
 	}
 
 	public LiveData<List<PlacedTag>> getPlacedTagList() {
-		Log.d("PlacedTag", "getPlacedTagList called in PlacedTagwModel");
+		Log.d(LOG_TAG, "getPlacedTagList called in PlacedTagModel");
 		if (placedTagList == null) {
 			placedTagList = new MutableLiveData<>();
 			loadPlacedTags();
@@ -46,20 +46,19 @@ public class PlacedTagModel extends AndroidViewModel {
 	}
 
 	private void loadPlacedTags() {
-		Log.d("PlacedTag", "loadPlacedTags started in PlacedTagwModel");
+		Log.d(LOG_TAG, "loadPlacedTags started in PlacedTagModel");
 		// do async operation to fetch users
 		Handler myHandler = new Handler();
 		myHandler.postDelayed(() -> {
 
-			Bitmap icon = BitmapFactory.decodeResource(getApplication().getResources(),
-					R.drawable.t_icon);
+			Bitmap icon = BitmapFactory.decodeResource(getApplication().getResources(), R.drawable.t_icon);
 
 			String iconString = "first setup";
 
 			PlacedTag newPlacedTag = new PlacedTag(iconString, "type2", 0.0f, 0.0f, 0.0f);
 			appDatabase.placedTagModel().addPlacedTag(newPlacedTag);
 
-			Log.d("PlacedTag", "newPlacedTag added in PlacedTagwModel");
+			Log.d(LOG_TAG, "newPlacedTag added in PlacedTagModel");
 
 			//placedTagList = appDatabase.placedTagModel().getPlacedTags();
 		}, 5000);
@@ -84,7 +83,7 @@ public class PlacedTagModel extends AndroidViewModel {
 	@Override
 	protected void onCleared() {
 		super.onCleared();
-		Log.d(TAG, "on cleared called");
+		Log.d(LOG_TAG, "on cleared called");
 	}
 
 	private static class deletePTAsyncTask extends AsyncTask<PlacedTag, Void, Void> {

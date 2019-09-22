@@ -6,7 +6,8 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {Tagpost.class, PlacedTag.class}, version = 1)
+//See build gradle to use exportedSchema or set to false
+@Database(entities = {Tagpost.class, PlacedTag.class}, version = 1, exportSchema = true)
 public abstract class AppDatabase extends RoomDatabase {
 
 	private static AppDatabase INSTANCE;

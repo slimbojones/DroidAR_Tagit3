@@ -17,6 +17,11 @@ android {
                 cppFlags ""
             }
         }
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
     buildTypes {
         release {
@@ -28,6 +33,11 @@ android {
         cmake {
             path "CMakeLists.txt"
         }
+    }
+    // add the schema location to the source sets
+    // used by Room, to test migrations
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
     compileOptions {

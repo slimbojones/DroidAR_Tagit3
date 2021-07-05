@@ -1,23 +1,9 @@
 package com.example.nick.droidar_tagit;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -27,149 +13,152 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SearchActivity extends Activity
-{
-    EditText etQuery;
-    GridView gvImageResult;
-    Button btSearch;
-    TextView tvPage;
+import androidx.appcompat.app.AppCompatActivity;
 
-    ArrayList<ImageResult> imageResults = new ArrayList<ImageResult>();
-    ImageResultArrayAdapter imageAdapter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
-        setupViews();
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 
-        imageAdapter = new ImageResultArrayAdapter(this,  imageResults);
-        gvImageResult.setAdapter(imageAdapter);
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 
-		 //Click on a thumbnail
-        gvImageResult.setOnItemClickListener(new OnItemClickListener() {
+public class SearchActivity extends AppCompatActivity {
+	EditText etQuery;
+	GridView gvImageResult;
+	Button btSearch;
+	TextView tvPage;
 
-            @Override
-            public void onItemClick(AdapterView<?> adaptor, View parent, int position,
-                                    long rowId) {
-                Intent i = new Intent(getApplicationContext(),
-                        ArActivity.class);
-                ImageResult imageResult = imageResults.get(position);
+	static final String LOG_TAG = SearchActivity.class.getSimpleName();
 
-                //TODO get full image url instead of thumbnail?
-                i.putExtra("webImage", imageResult.getFullUrl());
-                Log.d("customSearch", "onclick full url: " + imageResult.getFullUrl());
+	ArrayList<ImageResult> imageResults = new ArrayList<ImageResult>();
+	ImageResultArrayAdapter imageAdapter;
 
-                setResult(ArActivity.RESULT_OK, i);
-                finish();
-            }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_search);
+		setupViews();
 
-        });
+		imageAdapter = new ImageResultArrayAdapter(this, imageResults);
+		gvImageResult.setAdapter(imageAdapter);
 
-        // When this Activity is called somewhere else
-        Bundle extras = getIntent().getExtras();
-        if (extras != null ) {
-            String searchString = extras.getString(Intent.EXTRA_TEXT);
-            if (searchString != null ) {
-                etQuery.setText(searchString);
-                onImageSearch(btSearch);
-            }
-        }
-    }
+		//Click on a thumbnail
+		gvImageResult.setOnItemClickListener(new OnItemClickListener() {
 
-    public void setupViews() {
-        etQuery = (EditText) findViewById(R.id.etQuery);
-        gvImageResult = (GridView)findViewById(R.id.gvImageResult);
-        btSearch = (Button ) findViewById(R.id.btSearch);
-        tvPage = (TextView) findViewById(R.id.tvPage);
+			@Override
+			public void onItemClick(AdapterView<?> adaptor, View parent, int position, long rowId) {
+				Intent i = new Intent(getApplicationContext(), ArActivity.class);
+				ImageResult imageResult = imageResults.get(position);
 
-    }
+				//TODO get full image url instead of thumbnail?
+				i.putExtra("webImage", imageResult.getFullUrl());
+				Log.d(LOG_TAG, "onclick full url: " + imageResult.getFullUrl());
 
-     //Clicking Search Button
-    public void onImageSearch (View v) {
+				setResult(ArActivity.RESULT_OK, i);
+				finish();
+			}
+		});
 
-        String query = etQuery.getText().toString();
-        Toast.makeText(this, "Searching for " + query,  Toast.LENGTH_SHORT)
-                .show();
+		// When this Activity is called somewhere else
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			String searchString = extras.getString(Intent.EXTRA_TEXT);
+			if (searchString != null) {
+				etQuery.setText(searchString);
+				onImageSearch(btSearch);
+			}
+		}
+	}
 
-        try {
-            new searchQuery().execute();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+	public void setupViews() {
+		etQuery = (EditText) findViewById(R.id.etQuery);
+		gvImageResult = (GridView) findViewById(R.id.gvImageResult);
+		btSearch = (Button) findViewById(R.id.btSearch);
+		tvPage = (TextView) findViewById(R.id.tvPage);
+	}
 
-    }
+	//Clicking Search Button
+	public void onImageSearch(View v) {
 
-    private class searchQuery extends AsyncTask<String, Void, JSONArray> {
-        String key="AIzaSyCiriyv0k9cVQrX_1QLGNA8Jt3abgnZt8Q";
-        String cseID;
+		String query = etQuery.getText().toString();
+		Toast.makeText(this, "Searching for " + query, Toast.LENGTH_SHORT).show();
 
-        String qry = URLEncoder.encode(etQuery.getText().toString(), "utf-8");
-        //String qry="cat";// your keyword to search
-        URL url = null;
+		try {
+			new searchQuery().execute();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
 
-        JSONArray imageJsonResults;
+	private class searchQuery extends AsyncTask<String, Void, JSONArray> {
+		String key = "AIzaSyCiriyv0k9cVQrX_1QLGNA8Jt3abgnZt8Q";
+		String cseID;
 
-        private searchQuery() throws UnsupportedEncodingException {
-        }
+		String qry = URLEncoder.encode(etQuery.getText().toString(), "utf-8");
+		//String qry="cat";// your keyword to search
+		URL url = null;
 
-        @Override
-        protected JSONArray doInBackground(String... qryString) {
-            try {
-                url = new URL("https://www.googleapis.com/customsearch/v1?key="+key+"&cx=010994179142303008059:ywduztp3y6o&q="+ qry + "&alt=json" +"&searchType=image");
+		JSONArray imageJsonResults;
 
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("Accept", "application/json");
-                BufferedReader br = new BufferedReader(new InputStreamReader(
-                        (conn.getInputStream())));
+		private searchQuery() throws UnsupportedEncodingException { }
 
-                StringBuilder builder = new StringBuilder();
+		@Override
+		protected JSONArray doInBackground(String... qryString) {
+			try {
+				url = new URL("https://www.googleapis.com/customsearch/v1?key=" + key + "&cx=010994179142303008059:ywduztp3y6o&q=" + qry + "&alt=json" + "&searchType=image");
 
-                String output;
-                Log.d("customSearch", "url.toString()" + url.toString());
-                while ((output = br.readLine()) != null) {
-                    builder.append(output + "\n");
-                }
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+				conn.setRequestMethod("GET");
+				conn.setRequestProperty("Accept", "application/json");
+				StringBuilder builder;
+				try (BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())))) {
 
-                try {
-                    JSONObject outerJSON = new JSONObject(builder.toString());
-                    Log.d("customSearch", "outerJSON: " + outerJSON.toString());
-                    imageJsonResults = outerJSON.getJSONArray("items");
+					builder = new StringBuilder();
 
+					String output;
+					Log.d(LOG_TAG, "url.toString()" + url.toString());
+					while ((output = br.readLine()) != null) {
+						builder.append(output).append("\n");
+					}
+				}
 
-                    Log.d("customSearch", "itemArray: " + imageJsonResults.toString());
+				try {
+					JSONObject outerJSON = new JSONObject(builder.toString());
+					Log.d(LOG_TAG, "outerJSON: " + outerJSON.toString());
+					imageJsonResults = outerJSON.getJSONArray("items");
 
-                    imageResults.clear();
+					Log.d(LOG_TAG, "itemArray: " + imageJsonResults.toString());
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Log.d("customSearch", "builder.toString()" + builder.toString());
-                try {
-                    JSONArray jsonArray = new JSONArray(builder.toString());
-                    Log.d("customSearch", "jsonArray.toString" + jsonArray.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                //TODO need to close bufferedReader or string builder ??
-                conn.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+					imageResults.clear();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				Log.d(LOG_TAG, "builder.toString()" + builder);
+				try {
+					JSONArray jsonArray = new JSONArray(builder.toString());
+					Log.d(LOG_TAG, "jsonArray.toString" + jsonArray.toString());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				//TODO need to close bufferedReader or string builder ??
+				conn.disconnect();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
-            return imageJsonResults;
-        }
-        @Override
-        protected void onPostExecute(JSONArray jArray) {
-            imageAdapter.addAll(ImageResult
-                    .fromJSONArray(imageJsonResults));
-        }
-    }
+			return imageJsonResults;
+		}
 
-
+		@Override
+		protected void onPostExecute(JSONArray jArray) {
+			imageAdapter.addAll(ImageResult.fromJSONArray(imageJsonResults));
+		}
+	}
 }

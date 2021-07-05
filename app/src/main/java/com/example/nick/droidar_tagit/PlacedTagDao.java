@@ -1,15 +1,14 @@
 package com.example.nick.droidar_tagit;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.persistence.room.Dao;
-import android.arch.persistence.room.Delete;
-import android.arch.persistence.room.Insert;
-import android.arch.persistence.room.Query;
-import android.util.Log;
+import androidx.lifecycle.LiveData;
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.Query;
 
 import java.util.List;
 
-import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
+import static androidx.room.OnConflictStrategy.REPLACE;
 
 /**
  * Created by nick on 1/10/2018.
@@ -17,22 +16,21 @@ import static android.arch.persistence.room.OnConflictStrategy.REPLACE;
 @Dao
 public interface PlacedTagDao {
 
-    @Query("select * from PlacedTag ORDER BY id DESC")
-    LiveData<List<PlacedTag>> getPlacedTags();
+	@Query("select * from PlacedTag ORDER BY id DESC")
+	LiveData<List<PlacedTag>> getPlacedTags();
 
-    @Query("select * from PlacedTag where id = :id")
-    PlacedTag getPlacedTagbyId(int id);
+	@Query("select * from PlacedTag where id = :id")
+	PlacedTag getPlacedTagbyId(int id);
 
-    @Insert(onConflict = REPLACE)
-    void addPlacedTag(com.example.nick.droidar_tagit.PlacedTag placedTag);
+	@Insert(onConflict = REPLACE)
+	void addPlacedTag(PlacedTag placedTag);
 
-    @Delete
-    void deletePlacedTag(com.example.nick.droidar_tagit.PlacedTag placedTag);
+	@Delete
+	void deletePlacedTag(PlacedTag placedTag);
 
-    @Query("DELETE FROM PlacedTag")
-    public void deleteAllPlacedTags();
+	@Query("DELETE FROM PlacedTag")
+	void deleteAllPlacedTags();
 
-    @Query("DELETE FROM PlacedTag where id = :id")
-    public void deletePlacedTagById(int id);
-
+	@Query("DELETE FROM PlacedTag where id = :id")
+	void deletePlacedTagById(int id);
 }

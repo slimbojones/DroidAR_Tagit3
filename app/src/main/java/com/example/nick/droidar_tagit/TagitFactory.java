@@ -2,16 +2,13 @@ package com.example.nick.droidar_tagit;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.opengl.GLES20;
 import android.widget.TextView;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import geo.GeoObj;
 import gl.Color;
-import gl.CordinateAxis;
+import gl.CoordinateAxis;
 import gl.GLCamera;
 import gl.Renderable;
 import gl.animations.AnimationFaceToCamera;
@@ -32,31 +29,31 @@ import worldData.World;
 
 /**
  * Use this factory to understand how to create 3D objects with {@link Shape}s
- * and {@link RenderGroup}s. Often it is more efficient to create the objects
+ * and {@link system.Container}s. Often it is more efficient to create the objects
  * you need manually and not combine objects created with this factory. The
  * benefits of algorithmic objects are that they are much more flexible and
  * random {@link Vec}tors can be used to add a unique touch to each object.
- * 
+ * <p>
  * Loading object from externmal files like md3 is the alternative to this
  * approach.
- * 
- * 
+ *
  * @author Spobo
- * 
  */
 public class TagitFactory {
 
-	private static final String LOG_TAG = "GLFactory";
-
+	private static final String LOG_TAG = TagitFactory.class.getSimpleName();
+	private static final float HEIGHT_TO_SIDE_FACTOR = (float) (2f / Math.sqrt(3f));
 	private static TagitFactory myInstance = new TagitFactory();
 
-	private TagitFactory() {
-	}
+	private TagitFactory() { }
 
 	public static TagitFactory getInstance() {
 		return myInstance;
 	}
 
+	public static void resetInstance() {
+		myInstance = new TagitFactory();
+	}
 
 	public Shape newSquare(Color canBeNull) {
 		Shape s = new Shape(canBeNull);
@@ -136,14 +133,12 @@ public class TagitFactory {
 	 * see {@link TagitFactory#newTexturedSquare(String, Bitmap, float)}
 	 *
 	 * @param context
-	 * @param iconId
-	 *            The id of the icon that should be used as the texture (will
-	 *            also be used as the unique texture name)
+	 * @param iconId         The id of the icon that should be used as the texture (will
+	 *                       also be used as the unique texture name)
 	 * @param heightInMeters
 	 * @return
 	 */
-	public MeshComponent newTexturedSquare(Context context, int iconId,
-			float heightInMeters) {
+	public MeshComponent newTexturedSquare(Context context, int iconId,  float heightInMeters) {
 		return newTexturedSquare("" + iconId,
 				IO.loadBitmapFromId(context, iconId), heightInMeters);
 	}
@@ -153,22 +148,17 @@ public class TagitFactory {
 	 * {@link TextureManager#addTexture(TexturedRenderData, Bitmap, String)} for
 	 * information about the parameters.
 	 *
-	 * @param bitmapName
-	 *            see
-	 *            {@link TextureManager#addTexture(TexturedRenderData, Bitmap, String)}
-	 * @param bitmap
-	 *            see
-	 *            {@link TextureManager#addTexture(TexturedRenderData, Bitmap, String)}
-	 * @param heightInMeters
-	 *            the square will have this height and width
+	 * @param bitmapName     see
+	 *                       {@link TextureManager#addTexture(TexturedRenderData, Bitmap, String)}
+	 * @param bitmap         see
+	 *                       {@link TextureManager#addTexture(TexturedRenderData, Bitmap, String)}
+	 * @param heightInMeters the square will have this height and width
 	 * @return
 	 */
-	public MeshComponent newTexturedSquare(String bitmapName, Bitmap bitmap,
-			float heightInMeters) {
+	public MeshComponent newTexturedSquare(String bitmapName, Bitmap bitmap, float heightInMeters) {
 
 		if (bitmapName == null) {
-			Log.e(LOG_TAG,
-					"No bitmap id set, can't be added to Texture Manager!");
+			Log.e(LOG_TAG, "No bitmap id set, can't be added to Texture Manager!");
 			return null;
 		}
 
@@ -232,7 +222,7 @@ public class TagitFactory {
 	}
 
 	private MeshComponent newArrow(float x, float y, float height, Color top,
-			Color edge1, Color bottom, Color edge2) {
+								   Color edge1, Color bottom, Color edge2) {
 
 		MeshComponent pyr = new Shape(null);
 
@@ -275,14 +265,12 @@ public class TagitFactory {
 		return o;
 	}
 
-	private void addRotateAnimation(MeshComponent target, int speed,
-			Vec rotationVec) {
+	private void addRotateAnimation(MeshComponent target, int speed, Vec rotationVec) {
 		AnimationRotate a = new AnimationRotate(speed, rotationVec);
 		target.addAnimation(a);
 	}
 
-	public MeshComponent newGrid(Color netColor, float spaceBetweenNetStrings,
-			int lineCount) {
+	public MeshComponent newGrid(Color netColor, float spaceBetweenNetStrings, int lineCount) {
 		Shape s = new Shape(netColor);
 		s.setLineDrawing();
 		float coord = (lineCount - 1) * spaceBetweenNetStrings / 2;
@@ -316,13 +304,11 @@ public class TagitFactory {
 		MeshComponent earthBox = new Shape();
 		earthRing.addChild(earthBox);
 
-		MeshComponent sun = TagitFactory.getInstance().newNSidedPolygonWithGaps(
-				20, Color.red());
+		MeshComponent sun = TagitFactory.getInstance().newNSidedPolygonWithGaps(20, Color.red());
 		TagitFactory.getInstance().addRotateAnimation(sun, 30, new Vec(1, 1, 1));
 		sunBox.addChild(sun);
 
-		TagitFactory.getInstance().addRotateAnimation(earthRing, 40,
-				new Vec(0.5f, 0.3f, 1));
+		TagitFactory.getInstance().addRotateAnimation(earthRing, 40, new Vec(0.5f, 0.3f, 1));
 		earthBox.setPosition(new Vec(3, 0, 0));
 		sunBox.addChild(earthRing);
 
@@ -335,8 +321,7 @@ public class TagitFactory {
 		MeshComponent moon = TagitFactory.getInstance().newCircle(Color.white());
 		moon.setPosition(new Vec(1, 0, 0));
 		moon.scaleEqual(0.2f);
-		TagitFactory.getInstance().addRotateAnimation(moonring, 80,
-				new Vec(0, 1, -1));
+		TagitFactory.getInstance().addRotateAnimation(moonring, 80, new Vec(0, 1, -1));
 		moonring.addChild(moon);
 
 		earthBox.addChild(moonring);
@@ -426,19 +411,16 @@ public class TagitFactory {
 		s.add(e1);
 
 		return s;
-
 	}
 
 	public Shape newDirectedPath(GeoObj from, GeoObj to, Color color) {
-		return TagitFactory.getInstance().newDirectedPath(
-				to.getVirtualPosition(from), color);
+		return TagitFactory.getInstance().newDirectedPath(to.getVirtualPosition(from), color);
 	}
 
 	public Shape newDirectedPath(Vec lineEndPos, Color c) {
 
 		Shape s = new Shape(c);
-		Vec orth = Vec.getOrthogonalHorizontal(lineEndPos).normalize()
-				.mult(0.9f);
+		Vec orth = Vec.getOrthogonalHorizontal(lineEndPos).normalize().mult(0.9f);
 		Vec orthClone = orth.getNegativeClone();
 		float down = 0.5f;
 		Vec l = lineEndPos.copy().setLength(0.3f);
@@ -532,9 +514,6 @@ public class TagitFactory {
 		return s;
 	}
 
-	private static final float HEIGHT_TO_SIDE_FACTOR = (float) (2f / Math
-			.sqrt(3f));
-
 	public Shape newPyramid(Vec center, float height, Color color) {
 		Shape p = new Shape(color);
 		// side length:
@@ -566,10 +545,6 @@ public class TagitFactory {
 		return p;
 	}
 
-	public static void resetInstance() {
-		myInstance = new TagitFactory();
-	}
-
 	public MeshComponent newCube() {
 		return newCube(null);
 	}
@@ -583,11 +558,9 @@ public class TagitFactory {
 			}
 
 			@Override
-			public void draw(GL10 gl, Renderable parent) {
-				CordinateAxis.draw(gl);
-
+			public void draw(GLES20 gl, Renderable parent) {
+				CoordinateAxis.draw(gl);
 			}
-
 		};
 	}
 
@@ -596,14 +569,12 @@ public class TagitFactory {
 	 * {@link TagitFactory#newTexturedSquare(String, Bitmap, float)}
 	 *
 	 * @param textToDisplay
-	 * @param textPosition
-	 * @param textSize
+	 * @param textPosition  //@param textSize
 	 * @param context
 	 * @param glCamera
 	 * @return
 	 */
-	public Obj newTextObject(String textToDisplay, Vec textPosition,
-			Context context, GLCamera glCamera) {
+	public Obj newTextObject(String textToDisplay, Vec textPosition, Context context, GLCamera glCamera) {
 
 		float textSize = 14;
 
@@ -622,25 +593,21 @@ public class TagitFactory {
 		return o;
 	}
 
-
-
 	/**
 	 * also read {@link TagitFactory#newTexturedSquare(String, Bitmap, float)}
-	 * 
+	 *
 	 * @param latitude
 	 * @param longitude
-	 * @param bitmap
-	 *            the loaded bitmap (e.g. via
-	 *            {@link IO#loadBitmapFromURL(String)}
-	 * @param uniqueBitmapName
-	 *            a unique bitmap name
+	 * @param bitmap           the loaded bitmap (e.g. via
+	 *                         {@link IO#loadBitmapFromURL(String)}
+	 * @param uniqueBitmapName a unique bitmap name
 	 * @param heightInMeters
 	 * @param glCamera
 	 * @return an {@link GeoObj} which can be added to the {@link World} e.g.
 	 */
 	public GeoObj newIconFacingToCamera(double latitude, double longitude,
-			Bitmap bitmap, String uniqueBitmapName, float heightInMeters,
-			GLCamera glCamera) {
+										Bitmap bitmap, String uniqueBitmapName, float heightInMeters,
+										GLCamera glCamera) {
 		MeshComponent triangleMesh = TagitFactory.getInstance().newTexturedSquare(
 				uniqueBitmapName, bitmap, heightInMeters);
 		triangleMesh.addChild(new AnimationFaceToCamera(glCamera, 0.5f));
@@ -648,5 +615,4 @@ public class TagitFactory {
 		o.setComp(triangleMesh);
 		return o;
 	}
-
 }

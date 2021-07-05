@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.nick.droidar_tagit"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.nick.droidar_tagit">
 
     <!--
          IMPORTANT: The following permissions should also be added to each project
@@ -15,9 +15,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera2" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature android:glEsVersion="0x00020000" />
+    <uses-feature android:glEsVersion="0x00030000" />
 
     <uses-feature
         android:name="android.hardware.sensor.proximity"
@@ -37,18 +37,20 @@
         android:smallScreens="true" />
 
 
-
     <application
 
         android:allowBackup="true"
+        android:extractNativeLibs="false"
+        android:fullBackupContent="@xml/backup_descriptor"
+        android:hardwareAccelerated="false"
         android:icon="@drawable/ic_t_logo"
         android:label="@string/app_name"
-        android:hardwareAccelerated="false"
         android:largeHeap="true"
         android:roundIcon="@drawable/ic_t_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace = "android:icon">
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:icon">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -58,21 +60,23 @@
         </activity>
 
 
-
         <!--
              IMPORTANT: The following activities have to be added to each project
 			which imports the DroidAR Library
         -->
 
         <activity
-            android:name="system.ArActivity"
+            android:name=".ArActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name"
-            android:screenOrientation="landscape" >
-        </activity>
+            android:screenOrientation="landscape"
+            tools:ignore="LockedOrientationActivity"></activity>
+        <activity android:name=".SearchActivity" />
 
-        <activity
-
+        <!--activity
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
             android:name="ArActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -80,20 +84,14 @@
                 <data android:mimeType="text/plain"/>
                 <data android:mimeType="image/*"/>
             </intent-filter>
-
-
-            android:configChanges="keyboardHidden|orientation"
-            android:label="@string/app_name"
-
-            android:screenOrientation="landscape" >
-        </activity>
+        </activity-->
 
         <!-- Custom List is used to easily display lists of any type of object -->
-        <activity android:name=".SearchActivity" >
-        </activity>
+        <!--activity android:name=".SearchActivity" >
+        </activity-->
 
         <!-- the error handler will be automatically displayed when an error appears -->
-        <activity
+        <!--activity
             android:name="system.ErrorHandler"
             android:process=":myexeptionprocess"
             android:taskAffinity="system.ErrorHandler" >
@@ -104,19 +102,19 @@
 
                 <data android:mimeType="errors/myUnhandleCatcher" />
             </intent-filter>
-        </activity>
+        </activity-->
 
         <!-- is needed to display information on application startup -->
-        <activity
+        <!--activity
             android:name="gui.InfoScreen"
             android:theme="@android:style/Theme.Dialog" >
-        </activity>
+        </activity-->
 
         <!-- an activity to easily display any kind of ui -->
-        <activity
+        <!--activity
             android:name="gui.simpleUI.SimpleUIv1"
             android:theme="@android:style/Theme.Translucent" >
-        </activity>
+        </activity-->
     </application>
 
 </manifest>

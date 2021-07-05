@@ -1,2 +1,4 @@
 include ':app'
-include ':droidAR'
+//, ':droidarNew'
+include ':droidar'
+project(':droidar').projectDir = new File('../droidar/droidar')
